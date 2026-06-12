@@ -1,0 +1,23 @@
+{
+  "site": {
+    "name": "哈哈图片",
+    "footerText": ""
+  },
+  "analytics": {
+    "umami": {
+      "src": "https://analytics.example.com/script.js",
+      "websiteId": "00000000-0000-0000-0000-000000000000"
+    },
+    "googleAnalyticsId": "G-XXXXXXXXXX",
+    "baiduId": "",
+    "customScripts": []
+  },
+  "ads": {
+    "enabled": false,
+    "slots": {
+      "home-top": { "html": "" },
+      "home-bottom": { "html": "" },
+      "tool-bottom": { "html": "" }
+    }
+  }
+}

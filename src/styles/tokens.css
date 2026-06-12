@@ -1,0 +1,89 @@
+/* Hallmark · macrostructure: Workbench (tool-grid app) · tone: utilitarian ·
+ * genre: modern-minimal · theme: custom (vibe: "warm paper, friendly orange, precise tool")
+ * paper oklch(98.5% 0.004 85) · accent oklch(60% 0.17 42) warm-orange · system font stack (CJK perf)
+ * axes: light / system-native / warm · studied: no
+ * Hallmark · pre-emit critique: P4 H5 E4 S4 R5 V4
+ */
+
+:root {
+  color-scheme: light;
+
+  /* color */
+  --paper: oklch(98.5% 0.004 85);
+  --paper-2: oklch(96.3% 0.006 80);
+  --paper-3: oklch(93.5% 0.008 80);
+  --ink: oklch(24% 0.012 60);
+  --muted: oklch(47% 0.014 60);
+  --border: oklch(89% 0.008 80);
+  --border-strong: oklch(80% 0.012 80);
+  --accent: oklch(60% 0.17 42);
+  --accent-strong: oklch(53% 0.17 42);
+  --accent-tint: oklch(95% 0.025 50);
+  --on-accent: oklch(99% 0.002 85);
+  --ok: oklch(56% 0.14 150);
+  --ok-tint: oklch(95% 0.03 150);
+  --err: oklch(55% 0.19 25);
+  --err-tint: oklch(95% 0.025 25);
+  --focus: oklch(55% 0.15 250);
+
+  /* type */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas,
+    "Liberation Mono", monospace;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  --text-display: clamp(1.9rem, 1.2rem + 2.6vw, 2.7rem);
+
+  /* space (4pt) */
+  --space-2xs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 72px;
+
+  /* shape */
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 14px;
+  --rule: 1px solid var(--border);
+
+  /* motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 140ms;
+  --dur: 220ms;
+
+  /* layers */
+  --z-header: 100;
+  --z-overlay: 1000;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: oklch(19% 0.01 60);
+  --paper-2: oklch(23% 0.012 60);
+  --paper-3: oklch(28% 0.014 60);
+  --ink: oklch(93% 0.006 85);
+  --muted: oklch(68% 0.012 70);
+  --border: oklch(31% 0.012 60);
+  --border-strong: oklch(40% 0.014 60);
+  --accent: oklch(70% 0.16 45);
+  --accent-strong: oklch(76% 0.15 45);
+  --accent-tint: oklch(28% 0.04 45);
+  --on-accent: oklch(16% 0.02 45);
+  --ok: oklch(72% 0.14 150);
+  --ok-tint: oklch(28% 0.04 150);
+  --err: oklch(70% 0.16 25);
+  --err-tint: oklch(28% 0.04 25);
+  --focus: oklch(72% 0.13 250);
+}
