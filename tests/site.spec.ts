@@ -81,6 +81,35 @@ test.describe('站点框架', () => {
       .toBe(true)
   })
 
+  test('最近使用：访问工具后出现在首页', async ({ page }) => {
+    await page.goto('/#/crop')
+    await expect(page.locator('.tool-head h1')).toHaveText('裁剪图片')
+    await page.goto('/#/')
+    const recentSection = page.locator('section', { has: page.locator('#cat-recent') })
+    await expect(recentSection.getByRole('heading', { name: /最近使用/ })).toBeVisible()
+    await expect(recentSection.locator('.tool-card h3')).toHaveText('裁剪图片')
+  })
+
+  test('Ctrl+V 粘贴图片上传', async ({ page }) => {
+    await page.goto('/#/compress')
+    await expect(page.locator('.dropzone')).toBeVisible() // 等懒加载页面挂载粘贴监听
+    await page.evaluate(() => {
+      const c = document.createElement('canvas')
+      c.width = 32
+      c.height = 32
+      c.getContext('2d')!.fillRect(0, 0, 32, 32)
+      return new Promise<void>(resolve => {
+        c.toBlob(blob => {
+          const dt = new DataTransfer()
+          dt.items.add(new File([blob!], 'pasted.png', { type: 'image/png' }))
+          window.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt }))
+          resolve()
+        }, 'image/png')
+      })
+    })
+    await expect(page.locator('.file-item .name')).toHaveText('pasted.png')
+  })
+
   test('移动端 375px 无横向滚动', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 720 })
     await page.goto('/#/')

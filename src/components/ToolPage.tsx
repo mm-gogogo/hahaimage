@@ -1,15 +1,18 @@
 import { type ReactNode, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
+import { recordRecent } from '../lib/recent'
 import { AdSlot } from './AdSlot'
 import { Icon } from './Icon'
 
 export function ToolPage({ title, desc, children }: { title: string; desc: string; children: ReactNode }) {
+  const { pathname } = useLocation()
   useEffect(() => {
     document.title = `${title} - 哈哈图片`
+    if (pathname !== '/admin') recordRecent(pathname)
     return () => {
       document.title = '哈哈图片 - 免费开源的在线图片工具箱'
     }
-  }, [title])
+  }, [title, pathname])
 
   return (
     <div className="container">

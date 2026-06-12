@@ -387,6 +387,10 @@ textarea {
 .dropzone .dz-icon {
   color: var(--accent);
 }
+.dz-paste {
+  font-size: var(--text-xs);
+  opacity: 0.75;
+}
 .dropzone-compact {
   padding: var(--space-md);
 }

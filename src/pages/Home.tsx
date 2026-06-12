@@ -2,10 +2,15 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AdSlot } from '../components/AdSlot'
 import { Icon } from '../components/Icon'
-import { categories } from '../tools'
+import { getRecentPaths } from '../lib/recent'
+import { allTools, categories } from '../tools'
 
 export default function Home() {
   const [query, setQuery] = useState('')
+  const recent = useMemo(
+    () => getRecentPaths().map(p => allTools.find(t => t.path === p)).filter(t => t != null),
+    [],
+  )
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -43,6 +48,28 @@ export default function Home() {
       </section>
 
       <AdSlot id="home-top" />
+
+      {!query.trim() && recent.length > 0 && (
+        <section className="cat-section" aria-labelledby="cat-recent">
+          <h2 id="cat-recent">
+            最近使用
+            <span className="cat-count">{recent.length} 个工具</span>
+          </h2>
+          <div className="tool-grid">
+            {recent.map(tool => (
+              <Link to={tool.path} className="tool-card" key={`recent-${tool.path}`}>
+                <span className="tool-icon">
+                  <Icon name={tool.icon} size={22} />
+                </span>
+                <span>
+                  <h3>{tool.name}</h3>
+                  <p>{tool.desc}</p>
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {filtered.length === 0 && (
         <p className="msg msg-info" role="status">
