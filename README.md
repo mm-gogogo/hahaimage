@@ -50,6 +50,17 @@ npm run build    # 类型检查 + 构建到 dist/
 npm run preview  # 预览构建产物
 ```
 
+## 测试
+
+Playwright E2E 测试覆盖全部 19 个工具的真实处理链路（上传 → 处理 → 校验输出文件魔数/字节）：
+
+```bash
+npm test         # 站点框架 + 图片工具 + ffmpeg 工具链（28 项）
+npm run test:ai  # AI 抠图（需下载约 40MB 模型，默认跳过）
+```
+
+测试夹具均在浏览器内现场生成：Canvas 合成噪点 PNG、手工构造 EXIF 段的 JPEG（断言压缩后 EXIF 保留且方向归一）、MediaRecorder 录制 WebM 再经「视频转 GIF」产出真实 GIF 串联测试所有 GIF 工具（含 WebP 魔数与 APNG `acTL` 块校验）。推送与 PR 会自动跑 CI（`.github/workflows/ci.yml`）。
+
 ## 部署
 
 构建产物是纯静态文件（`base: './'`，哈希路由），放到任意静态托管即可。

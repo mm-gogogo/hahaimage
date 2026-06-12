@@ -219,6 +219,31 @@ textarea {
   border-radius: 999px;
   padding: 4px 14px;
 }
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 420px;
+  padding-inline: 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--muted);
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+.search-box:focus-within {
+  border-color: var(--accent);
+}
+.search-input {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  outline: none;
+  color: var(--ink);
+}
+
 .cat-section {
   padding-block: var(--space-lg);
 }

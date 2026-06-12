@@ -29,7 +29,9 @@ export function ResultList({ items, zipName = 'hahaimage.zip' }: { items: Result
             {it.blob.type.startsWith('video/') ? (
               <video className="thumb" src={urls[i]} muted />
             ) : (
-              <img className="thumb" src={urls[i]} alt={it.name} loading="lazy" />
+              <a href={urls[i]} target="_blank" rel="noreferrer" aria-label={`新窗口预览 ${it.name}`} style={{ flex: 'none' }}>
+                <img className="thumb" src={urls[i]} alt={it.name} loading="lazy" />
+              </a>
             )}
             <div className="result-meta">
               <span className="name">{it.name}</span>

@@ -3,3 +3,5 @@ dist
 *.local
 .DS_Store
 npm-debug.log*
+test-results
+playwright-report
