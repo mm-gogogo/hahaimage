@@ -27,8 +27,15 @@ function ResultRow({ item, index }: { item: ResultItem; index: number }) {
     },
     [url, originalUrl],
   )
+  const [downloaded, setDownloaded] = useState(false)
   const isVideo = item.blob.type.startsWith('video/')
   const canCompare = !!originalUrl && !isVideo
+
+  const handleDownload = () => {
+    downloadBlob(item.blob, item.name)
+    setDownloaded(true)
+    window.setTimeout(() => setDownloaded(false), 1800)
+  }
 
   return (
     <div className="result-item" style={{ '--ri': index } as React.CSSProperties}>
@@ -56,9 +63,9 @@ function ResultRow({ item, index }: { item: ResultItem; index: number }) {
           对比
         </button>
       )}
-      <button className="btn btn-sm" onClick={() => downloadBlob(item.blob, item.name)}>
-        <Icon name="download" size={16} />
-        下载
+      <button className={`btn btn-sm${downloaded ? ' is-success' : ''}`} onClick={handleDownload}>
+        <Icon name={downloaded ? 'check' : 'download'} size={16} />
+        {downloaded ? '已下载' : '下载'}
       </button>
       {canCompare && compare && (
         <div className="result-compare">

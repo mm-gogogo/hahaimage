@@ -546,10 +546,56 @@ textarea.input {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px color-mix(in oklch, var(--accent) 20%, transparent);
 }
+/* 自定义滑块：更粗的圆角轨道 + accent 圆形滑块（带 hover/active 反馈） */
 input[type="range"] {
-  accent-color: var(--accent);
+  -webkit-appearance: none;
+  appearance: none;
   width: 100%;
-  min-height: 28px;
+  height: 28px;
+  background: transparent;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--paper-3);
+}
+input[type="range"]::-moz-range-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--paper-3);
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  margin-top: -6px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--paper);
+  box-shadow: 0 1px 4px color-mix(in oklch, var(--accent) 45%, transparent);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--paper);
+  box-shadow: 0 1px 4px color-mix(in oklch, var(--accent) 45%, transparent);
+}
+input[type="range"]:hover::-webkit-slider-thumb {
+  transform: scale(1.12);
+}
+input[type="range"]:active::-webkit-slider-thumb {
+  transform: scale(1.2);
+}
+input[type="range"]:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 4px color-mix(in oklch, var(--accent) 25%, transparent);
+}
+input[type="range"]:focus-visible {
+  outline: none;
 }
 input[type="color"] {
   inline-size: 44px;

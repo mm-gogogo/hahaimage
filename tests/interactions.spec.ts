@@ -67,6 +67,22 @@ test.describe('酷炫交互', () => {
     await expect(page.locator('.cat-section.is-revealed')).toHaveCount(4, { timeout: 5000 })
   })
 
+  test('下载后按钮短暂显示"已下载"反馈', async ({ page }) => {
+    await page.goto('/#/compress')
+    const b64 = await page.evaluate(() => {
+      const c = document.createElement('canvas')
+      c.width = 200
+      c.height = 150
+      c.getContext('2d')!.fillRect(0, 0, 200, 150)
+      return c.toDataURL('image/png').split(',')[1]
+    })
+    await upload(page, { name: 'p.png', mimeType: 'image/png', buffer: Buffer.from(b64, 'base64') })
+    await page.getByRole('button', { name: /开始压缩/ }).click()
+    await expect(page.locator('.result-item')).toHaveCount(1)
+    await page.getByRole('button', { name: '下载', exact: true }).click()
+    await expect(page.getByRole('button', { name: '已下载' })).toBeVisible()
+  })
+
   test('头部滚动后浮现阴影（is-scrolled）', async ({ page }) => {
     await page.goto('/#/')
     await expect(page.locator('.site-header')).not.toHaveClass(/is-scrolled/)
