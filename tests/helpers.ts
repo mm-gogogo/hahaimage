@@ -113,6 +113,72 @@ export async function upload(page: Page, files: UploadFile | UploadFile[]): Prom
   await page.locator('input[type=file]').first().setInputFiles(files)
 }
 
+/** 读取结果图自然尺寸 [宽, 高] */
+export async function resultSize(page: Page, index = 0): Promise<[number, number]> {
+  const src = await page.locator('.result-item .thumb').nth(index).getAttribute('src')
+  if (!src) throw new Error('结果缩略图没有 src')
+  return page.evaluate(
+    url =>
+      new Promise<[number, number]>(res => {
+        const im = new Image()
+        im.onload = () => res([im.naturalWidth, im.naturalHeight])
+        im.src = url
+      }),
+    src,
+  )
+}
+
+/**
+ * 把结果图分成 3×3 网格，返回每格中"明显偏离中性灰(128)"的像素数。
+ * 用于断言水印/叠加内容落在预期方位（背景须为中性灰）。
+ */
+export async function gridDeviation(page: Page, index = 0): Promise<number[][]> {
+  const src = await page.locator('.result-item .thumb').nth(index).getAttribute('src')
+  if (!src) throw new Error('结果缩略图没有 src')
+  return page.evaluate(
+    url =>
+      new Promise<number[][]>(res => {
+        const im = new Image()
+        im.onload = () => {
+          const c = document.createElement('canvas')
+          c.width = im.naturalWidth
+          c.height = im.naturalHeight
+          const x = c.getContext('2d')!
+          x.drawImage(im, 0, 0)
+          const W = im.naturalWidth
+          const H = im.naturalHeight
+          const grid: number[][] = []
+          for (let gy = 0; gy < 3; gy++) {
+            const row: number[] = []
+            for (let gx = 0; gx < 3; gx++) {
+              const id = x.getImageData(
+                Math.floor((gx * W) / 3),
+                Math.floor((gy * H) / 3),
+                Math.floor(W / 3),
+                Math.floor(H / 3),
+              ).data
+              let cnt = 0
+              for (let i = 0; i < id.length; i += 4) if (Math.abs(id[i] - 128) > 25) cnt++
+              row.push(cnt)
+            }
+            grid.push(row)
+          }
+          res(grid)
+        }
+        im.src = url
+      }),
+    src,
+  )
+}
+
+/** 网格中数值最大的格子坐标 [行, 列] */
+export function hottestCell(grid: number[][]): [number, number] {
+  let max = -1
+  let cell: [number, number] = [0, 0]
+  for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) if (grid[r][c] > max) { max = grid[r][c]; cell = [r, c] }
+  return cell
+}
+
 /** 读取第 index 个处理结果的原始字节（通过缩略图的 blob URL） */
 export async function resultBuffer(page: Page, index = 0): Promise<Buffer> {
   const src = await page.locator('.result-item .thumb').nth(index).getAttribute('src')
