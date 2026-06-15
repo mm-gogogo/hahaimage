@@ -1,40 +1,29 @@
 import { useState } from 'react'
+import { BatchRunner } from '../../components/BatchRunner'
 import { FileDrop } from '../../components/FileDrop'
 import { FileList } from '../../components/FileList'
-import { ResultList, type ResultItem } from '../../components/ResultList'
+import { ResultList } from '../../components/ResultList'
 import { ToolPage } from '../../components/ToolPage'
 import { compressJpegKeepExif } from '../../lib/exif'
 import { formatBytes } from '../../lib/image'
+import { useBatch } from '../../lib/useBatch'
+import { usePersistedState } from '../../lib/usePersistedState'
 
 export default function CompressExif() {
   const [files, setFiles] = useState<File[]>([])
-  const [quality, setQuality] = useState(0.8)
-  const [maxEdge, setMaxEdge] = useState('')
-  const [results, setResults] = useState<ResultItem[]>([])
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState('')
+  const [quality, setQuality] = usePersistedState('compressExif.quality', 0.8)
+  const [maxEdge, setMaxEdge] = usePersistedState('compressExif.maxEdge', '')
+  const { results, busy, done, total, error, run, cancel } = useBatch()
 
-  const run = async () => {
-    setBusy(true)
-    setError('')
-    setResults([])
-    try {
-      const out: ResultItem[] = []
-      for (const file of files) {
-        const blob = await compressJpegKeepExif(file, {
-          quality,
-          maxEdge: Number(maxEdge) > 0 ? Number(maxEdge) : undefined,
-        })
-        const saved = Math.max(0, Math.round((1 - blob.size / file.size) * 100))
-        out.push({ name: file.name, blob, note: `原 ${formatBytes(file.size)} → 减小 ${saved}% · EXIF 已保留` })
-      }
-      setResults(out)
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e))
-    } finally {
-      setBusy(false)
-    }
-  }
+  const start = () =>
+    run(files, async file => {
+      const blob = await compressJpegKeepExif(file, {
+        quality,
+        maxEdge: Number(maxEdge) > 0 ? Number(maxEdge) : undefined,
+      })
+      const saved = Math.max(0, Math.round((1 - blob.size / file.size) * 100))
+      return { name: file.name, blob, original: file, note: `原 ${formatBytes(file.size)} → 减小 ${saved}% · EXIF 已保留` }
+    })
 
   return (
     <ToolPage
@@ -48,7 +37,7 @@ export default function CompressExif() {
           onFiles={f => setFiles(prev => [...prev, ...f.filter(x => x.type === 'image/jpeg')])}
           hint="仅支持 JPG / JPEG，可多选"
         />
-        <FileList files={files} onRemove={i => setFiles(files.filter((_, j) => j !== i))} />
+        <FileList files={files} onRemove={i => setFiles(files.filter((_, j) => j !== i))} onClear={() => setFiles([])} />
       </div>
 
       <div className="panel">
@@ -62,11 +51,16 @@ export default function CompressExif() {
           <input id="ce-edge" className="input" type="number" min={1} placeholder="留空不缩放" value={maxEdge} onChange={e => setMaxEdge(e.target.value)} />
           <span className="help">缩放后 EXIF 中的方向标记会自动校正，避免看图软件二次旋转</span>
         </div>
-        {error && <p className="msg msg-error">{error}</p>}
-        <button className={`btn btn-primary${busy ? ' is-loading' : ''}`} disabled={files.length === 0 || busy} onClick={run}>
-          {busy && <span className="spinner" />}
-          {busy ? '压缩中…' : `开始压缩（${files.length} 个文件）`}
-        </button>
+        <BatchRunner
+          label={`开始压缩（${files.length} 个文件）`}
+          busy={busy}
+          done={done}
+          total={total}
+          error={error}
+          disabled={files.length === 0}
+          onRun={start}
+          onCancel={cancel}
+        />
       </div>
 
       <ResultList items={results} zipName="compressed-exif.zip" />

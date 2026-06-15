@@ -1,5 +1,6 @@
 import { Suspense, lazy, useEffect, useState, useSyncExternalStore } from 'react'
 import { Link, Route, Routes, useLocation } from 'react-router-dom'
+import { DropOverlay } from './components/DropOverlay'
 import { Icon } from './components/Icon'
 import { getConfig, subscribeConfig } from './lib/config'
 import Home from './pages/Home'
@@ -26,6 +27,24 @@ function ScrollReset() {
   return null
 }
 
+/** 路由内容：按路径 key 重放淡入上浮过渡 */
+function RoutedContent() {
+  const { pathname } = useLocation()
+  return (
+    <Suspense fallback={<Fallback />}>
+      <div className="route-fade" key={pathname}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/admin" element={<Admin />} />
+          {allTools.map(tool => (
+            <Route key={tool.path} path={tool.path} element={<tool.component />} />
+          ))}
+        </Routes>
+      </div>
+    </Suspense>
+  )
+}
+
 function Fallback() {
   return (
     <div className="suspense-fallback" role="status">
@@ -44,6 +63,7 @@ export default function App() {
 
   return (
     <>
+      <DropOverlay />
       <header className="site-header">
         <div className="container">
           <Link to="/" className="brand">
@@ -70,15 +90,7 @@ export default function App() {
 
       <main tabIndex={-1} style={{ outline: 'none' }}>
         <ScrollReset />
-        <Suspense fallback={<Fallback />}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/admin" element={<Admin />} />
-            {allTools.map(tool => (
-              <Route key={tool.path} path={tool.path} element={<tool.component />} />
-            ))}
-          </Routes>
-        </Suspense>
+        <RoutedContent />
       </main>
 
       <footer className="site-footer">

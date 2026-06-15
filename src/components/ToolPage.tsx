@@ -1,11 +1,14 @@
 import { type ReactNode, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { recordRecent } from '../lib/recent'
+import { allTools } from '../tools'
 import { AdSlot } from './AdSlot'
 import { Icon } from './Icon'
 
 export function ToolPage({ title, desc, children }: { title: string; desc: string; children: ReactNode }) {
   const { pathname } = useLocation()
+  const catId = allTools.find(t => t.path === pathname)?.catId ?? 'image'
+
   useEffect(() => {
     document.title = `${title} - 哈哈图片`
     if (pathname !== '/admin') recordRecent(pathname)
@@ -15,7 +18,7 @@ export function ToolPage({ title, desc, children }: { title: string; desc: strin
   }, [title, pathname])
 
   return (
-    <div className="container">
+    <div className="container" data-cat={catId}>
       <header className="tool-head">
         <Link to="/" className="breadcrumb">
           <Icon name="back" size={16} />

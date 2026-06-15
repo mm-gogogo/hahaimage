@@ -1,31 +1,28 @@
 import { useEffect, useState } from 'react'
+import { FFmpegRunner } from '../../components/FFmpegRunner'
 import { FileDrop } from '../../components/FileDrop'
 import { ResultList, type ResultItem } from '../../components/ResultList'
 import { ToolPage } from '../../components/ToolPage'
 import { runFFmpeg } from '../../lib/ffmpeg'
 import { paletteFilter, safeInputName } from '../../lib/gif'
 import { baseName, formatBytes } from '../../lib/image'
+import { useFFmpegJob } from '../../lib/useFFmpegJob'
+import { usePersistedState } from '../../lib/usePersistedState'
 
 export default function VideoToGif() {
   const [file, setFile] = useState<File | null>(null)
   const [url, setUrl] = useState('')
-  const [fps, setFps] = useState('10')
-  const [width, setWidth] = useState('480')
+  const [fps, setFps] = usePersistedState('videoToGif.fps', '10')
+  const [width, setWidth] = usePersistedState('videoToGif.width', '480')
   const [results, setResults] = useState<ResultItem[]>([])
-  const [busy, setBusy] = useState(false)
-  const [status, setStatus] = useState('')
-  const [progress, setProgress] = useState(0)
-  const [error, setError] = useState('')
+  const job = useFFmpegJob()
 
   useEffect(() => () => URL.revokeObjectURL(url), [url])
 
-  const run = async () => {
+  const start = () => {
     if (!file) return
-    setBusy(true)
-    setError('')
     setResults([])
-    setProgress(0)
-    try {
+    job.run(async () => {
       const pre = [`fps=${fps}`]
       if (Number(width) > 0) pre.push(`scale=${width}:-2:flags=lanczos`)
       const name = safeInputName(file, 'mp4')
@@ -33,15 +30,11 @@ export default function VideoToGif() {
         inputs: [{ name, data: file }],
         args: ['-i', name, '-vf', paletteFilter(pre.join(',')), 'output.gif'],
         outputs: ['output.gif'],
-        onProgress: setProgress,
-        onStatus: setStatus,
+        onProgress: job.setProgress,
+        onStatus: job.setStatus,
       })
       setResults([{ name: `${baseName(file.name)}.gif`, blob: new Blob([out.data as BlobPart], { type: 'image/gif' }) }])
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e))
-    } finally {
-      setBusy(false)
-    }
+    })
   }
 
   return (
@@ -78,17 +71,7 @@ export default function VideoToGif() {
             </select>
           </div>
         </div>
-        {busy && (
-          <div className="field" role="status">
-            <span className="help">{status}</span>
-            <div className="progress"><i style={{ width: `${Math.round(progress * 100)}%` }} /></div>
-          </div>
-        )}
-        {error && <p className="msg msg-error">{error}</p>}
-        <button className={`btn btn-primary${busy ? ' is-loading' : ''}`} disabled={!file || busy} onClick={run}>
-          {busy && <span className="spinner" />}
-          {busy ? '转换中…' : '转换为 GIF'}
-        </button>
+        <FFmpegRunner label="转换为 GIF" busy={job.busy} status={job.status} progress={job.progress} error={job.error} disabled={!file} onRun={start} onCancel={job.cancel} />
       </div>
 
       <ResultList items={results} />

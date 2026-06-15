@@ -4,6 +4,7 @@ import { HashRouter } from 'react-router-dom'
 import App from './App'
 import { loadConfig } from './lib/config'
 import './styles/app.css'
+import './styles/motion.css'
 
 loadConfig()
 

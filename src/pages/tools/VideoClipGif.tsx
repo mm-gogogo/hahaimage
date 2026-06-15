@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
+import { FFmpegRunner } from '../../components/FFmpegRunner'
 import { FileDrop } from '../../components/FileDrop'
 import { ResultList, type ResultItem } from '../../components/ResultList'
 import { ToolPage } from '../../components/ToolPage'
 import { runFFmpeg } from '../../lib/ffmpeg'
 import { paletteFilter, safeInputName } from '../../lib/gif'
 import { baseName, formatBytes } from '../../lib/image'
+import { useFFmpegJob } from '../../lib/useFFmpegJob'
+import { usePersistedState } from '../../lib/usePersistedState'
 
 export default function VideoClipGif() {
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -12,13 +15,10 @@ export default function VideoClipGif() {
   const [url, setUrl] = useState('')
   const [start, setStart] = useState('0')
   const [end, setEnd] = useState('3')
-  const [fps, setFps] = useState('10')
-  const [width, setWidth] = useState('480')
+  const [fps, setFps] = usePersistedState('videoClip.fps', '10')
+  const [width, setWidth] = usePersistedState('videoClip.width', '480')
   const [results, setResults] = useState<ResultItem[]>([])
-  const [busy, setBusy] = useState(false)
-  const [status, setStatus] = useState('')
-  const [progress, setProgress] = useState(0)
-  const [error, setError] = useState('')
+  const job = useFFmpegJob()
 
   useEffect(() => () => URL.revokeObjectURL(url), [url])
 
@@ -27,19 +27,16 @@ export default function VideoClipGif() {
     setter(t.toFixed(1))
   }
 
-  const run = async () => {
+  const runClip = () => {
     if (!file) return
     const s = Number(start)
     const e = Number(end)
     if (!(e > s)) {
-      setError('结束时间必须大于开始时间')
+      job.setError('结束时间必须大于开始时间')
       return
     }
-    setBusy(true)
-    setError('')
     setResults([])
-    setProgress(0)
-    try {
+    job.run(async () => {
       const pre = [`fps=${fps}`]
       if (Number(width) > 0) pre.push(`scale=${width}:-2:flags=lanczos`)
       const name = safeInputName(file, 'mp4')
@@ -53,8 +50,8 @@ export default function VideoClipGif() {
           'output.gif',
         ],
         outputs: ['output.gif'],
-        onProgress: setProgress,
-        onStatus: setStatus,
+        onProgress: job.setProgress,
+        onStatus: job.setStatus,
       })
       setResults([
         {
@@ -63,11 +60,7 @@ export default function VideoClipGif() {
           note: `${(e - s).toFixed(1)} 秒片段`,
         },
       ])
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err))
-    } finally {
-      setBusy(false)
-    }
+    })
   }
 
   return (
@@ -124,17 +117,7 @@ export default function VideoClipGif() {
             </select>
           </div>
         </div>
-        {busy && (
-          <div className="field" role="status">
-            <span className="help">{status}</span>
-            <div className="progress"><i style={{ width: `${Math.round(progress * 100)}%` }} /></div>
-          </div>
-        )}
-        {error && <p className="msg msg-error">{error}</p>}
-        <button className={`btn btn-primary${busy ? ' is-loading' : ''}`} disabled={!file || busy} onClick={run}>
-          {busy && <span className="spinner" />}
-          {busy ? '转换中…' : '剪辑并转换为 GIF'}
-        </button>
+        <FFmpegRunner label="剪辑并转换为 GIF" busy={job.busy} status={job.status} progress={job.progress} error={job.error} disabled={!file} onRun={runClip} onCancel={job.cancel} />
       </div>
 
       <ResultList items={results} />

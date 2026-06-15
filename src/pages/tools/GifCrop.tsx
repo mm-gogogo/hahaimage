@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Icon } from '../../components/Icon'
 import { CropSelector, type CropRect } from '../../components/CropSelector'
 import { FileDrop } from '../../components/FileDrop'
 import { ResultList, type ResultItem } from '../../components/ResultList'
@@ -6,6 +7,7 @@ import { ToolPage } from '../../components/ToolPage'
 import { runFFmpeg } from '../../lib/ffmpeg'
 import { paletteFilter } from '../../lib/gif'
 import { baseName, loadImage } from '../../lib/image'
+import { useFFmpegJob } from '../../lib/useFFmpegJob'
 
 export default function GifCrop() {
   const [file, setFile] = useState<File | null>(null)
@@ -13,10 +15,7 @@ export default function GifCrop() {
   const [size, setSize] = useState<{ w: number; h: number } | null>(null)
   const [rect, setRect] = useState<CropRect>({ x: 0, y: 0, w: 100, h: 100 })
   const [results, setResults] = useState<ResultItem[]>([])
-  const [busy, setBusy] = useState(false)
-  const [status, setStatus] = useState('')
-  const [progress, setProgress] = useState(0)
-  const [error, setError] = useState('')
+  const job = useFFmpegJob()
 
   useEffect(() => () => URL.revokeObjectURL(url), [url])
 
@@ -35,13 +34,10 @@ export default function GifCrop() {
     setResults([])
   }
 
-  const run = async () => {
+  const start = () => {
     if (!file) return
-    setBusy(true)
-    setError('')
     setResults([])
-    setProgress(0)
-    try {
+    job.run(async () => {
       const [out] = await runFFmpeg({
         inputs: [{ name: 'input.gif', data: file }],
         args: [
@@ -50,15 +46,11 @@ export default function GifCrop() {
           'output.gif',
         ],
         outputs: ['output.gif'],
-        onProgress: setProgress,
-        onStatus: setStatus,
+        onProgress: job.setProgress,
+        onStatus: job.setStatus,
       })
       setResults([{ name: `${baseName(file.name)}_cropped.gif`, blob: new Blob([out.data as BlobPart], { type: 'image/gif' }), note: `${rect.w} × ${rect.h}` }])
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e))
-    } finally {
-      setBusy(false)
-    }
+    })
   }
 
   return (
@@ -76,21 +68,28 @@ export default function GifCrop() {
             <p className="help" style={{ textAlign: 'center', color: 'var(--muted)', fontSize: 'var(--text-sm)' }}>
               选区 {rect.w} × {rect.h} @ ({rect.x}, {rect.y})
             </p>
-            {busy && (
+            {job.busy && (
               <div className="field" role="status">
-                <span className="help">{status}</span>
-                <div className="progress"><i style={{ width: `${Math.round(progress * 100)}%` }} /></div>
+                <span className="help">{job.status || '裁剪中…'}</span>
+                <div className="progress"><i style={{ width: `${Math.round(job.progress * 100)}%` }} /></div>
               </div>
             )}
-            {error && <p className="msg msg-error">{error}</p>}
+            {job.error && <p className="msg msg-error">{job.error}</p>}
             <div className="row">
-              <button className={`btn btn-primary${busy ? ' is-loading' : ''}`} disabled={busy} onClick={run}>
-                {busy && <span className="spinner" />}
-                {busy ? '裁剪中…' : '裁剪'}
+              <button className={`btn btn-primary${job.busy ? ' is-loading' : ''}`} disabled={job.busy} onClick={start}>
+                {job.busy && <span className="spinner" />}
+                {job.busy ? '裁剪中…' : '裁剪'}
               </button>
-              <button className="btn" onClick={() => setFile(null)}>
-                换一个 GIF
-              </button>
+              {job.busy ? (
+                <button className="btn" onClick={job.cancel}>
+                  <Icon name="x" size={16} />
+                  取消
+                </button>
+              ) : (
+                <button className="btn" onClick={() => setFile(null)}>
+                  换一个 GIF
+                </button>
+              )}
             </div>
           </div>
           <ResultList items={results} />

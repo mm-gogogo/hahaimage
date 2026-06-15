@@ -42,6 +42,22 @@ export function getFFmpeg(onStatus?: (msg: string) => void): Promise<FFmpeg> {
   return loading
 }
 
+/**
+ * 中止当前 ffmpeg 处理：终止 worker 并清空单例，下次运行会重新加载
+ * （核心已在浏览器缓存中，重载很快）。用于用户取消长任务。
+ */
+export function terminateFFmpeg(): void {
+  if (instance) {
+    try {
+      instance.terminate()
+    } catch {
+      /* worker 可能已结束 */
+    }
+  }
+  instance = null
+  loading = null
+}
+
 export interface FFmpegTask {
   inputs: { name: string; data: Blob }[]
   args: string[]
