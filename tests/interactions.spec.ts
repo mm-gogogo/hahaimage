@@ -67,6 +67,13 @@ test.describe('酷炫交互', () => {
     await expect(page.locator('.cat-section.is-revealed')).toHaveCount(4, { timeout: 5000 })
   })
 
+  test('头部滚动后浮现阴影（is-scrolled）', async ({ page }) => {
+    await page.goto('/#/')
+    await expect(page.locator('.site-header')).not.toHaveClass(/is-scrolled/)
+    await page.evaluate(() => window.scrollTo(0, 400))
+    await expect(page.locator('.site-header')).toHaveClass(/is-scrolled/)
+  })
+
   test('路由切换包裹 route-fade 过渡', async ({ page }) => {
     await page.goto('/#/')
     await expect(page.locator('.route-fade')).toHaveCount(1)

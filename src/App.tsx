@@ -65,10 +65,19 @@ function Fallback() {
 
 export default function App() {
   const [theme, setTheme] = useState<Theme>(initTheme)
+  const [scrolled, setScrolled] = useState(false)
   useEffect(() => {
     document.documentElement.dataset.theme = theme
     localStorage.setItem('hahaimage.theme', theme)
   }, [theme])
+
+  // 页面下滚后让头部浮起一层阴影，增强层次
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 4)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   return (
     <>
@@ -76,7 +85,7 @@ export default function App() {
         跳到主要内容
       </a>
       <DropOverlay />
-      <header className="site-header">
+      <header className={`site-header${scrolled ? ' is-scrolled' : ''}`}>
         <div className="container">
           <Link to="/" className="brand">
             <span className="brand-mark">
