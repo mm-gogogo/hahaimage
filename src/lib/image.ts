@@ -45,6 +45,18 @@ export function canvasToBlob(canvas: HTMLCanvasElement, type = 'image/png', qual
   })
 }
 
+/**
+ * 诚实的体积对比文案：变小说"减小 N%"，变大说"增大 N%"，
+ * 基本不变说"体积基本不变"——不再把"增大"误报成"减小 0%"。
+ */
+export function sizeDeltaNote(originalSize: number, newSize: number): string {
+  const pct = Math.round((1 - newSize / originalSize) * 100)
+  const base = `原 ${formatBytes(originalSize)}`
+  if (pct >= 1) return `${base} → 减小 ${pct}%`
+  if (pct <= -1) return `${base} → 增大 ${Math.abs(pct)}%`
+  return `${base} → 体积基本不变`
+}
+
 export function formatBytes(n: number): string {
   if (n < 1024) return `${n} B`
   if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`

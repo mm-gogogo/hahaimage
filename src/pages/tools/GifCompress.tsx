@@ -5,7 +5,7 @@ import { ResultList, type ResultItem } from '../../components/ResultList'
 import { ToolPage } from '../../components/ToolPage'
 import { runFFmpeg } from '../../lib/ffmpeg'
 import { paletteFilter } from '../../lib/gif'
-import { baseName, formatBytes } from '../../lib/image'
+import { baseName, formatBytes, sizeDeltaNote } from '../../lib/image'
 import { useFFmpegJob } from '../../lib/useFFmpegJob'
 import { usePersistedState } from '../../lib/usePersistedState'
 
@@ -32,8 +32,7 @@ export default function GifCompress() {
         onStatus: job.setStatus,
       })
       const blob = new Blob([out.data as BlobPart], { type: 'image/gif' })
-      const saved = Math.max(0, Math.round((1 - blob.size / file.size) * 100))
-      setResults([{ name: `${baseName(file.name)}_compressed.gif`, blob, note: `原 ${formatBytes(file.size)} → 减小 ${saved}%` }])
+      setResults([{ name: `${baseName(file.name)}_compressed.gif`, blob, note: sizeDeltaNote(file.size, blob.size) }])
     })
   }
 

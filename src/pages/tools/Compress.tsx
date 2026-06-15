@@ -4,7 +4,7 @@ import { FileDrop } from '../../components/FileDrop'
 import { FileList } from '../../components/FileList'
 import { ResultList } from '../../components/ResultList'
 import { ToolPage } from '../../components/ToolPage'
-import { MIME_EXT, compressImage, formatBytes, replaceExt } from '../../lib/image'
+import { MIME_EXT, compressImage, replaceExt, sizeDeltaNote } from '../../lib/image'
 import { useBatch } from '../../lib/useBatch'
 import { usePersistedState } from '../../lib/usePersistedState'
 
@@ -22,12 +22,11 @@ export default function Compress() {
         quality,
         maxEdge: Number(maxEdge) > 0 ? Number(maxEdge) : undefined,
       })
-      const saved = Math.max(0, Math.round((1 - blob.size / file.size) * 100))
       return {
         name: replaceExt(file.name, MIME_EXT[mime]),
         blob,
         original: file,
-        note: `原 ${formatBytes(file.size)} → 减小 ${saved}%`,
+        note: sizeDeltaNote(file.size, blob.size),
       }
     })
 

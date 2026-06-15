@@ -5,7 +5,7 @@ import { FileList } from '../../components/FileList'
 import { ResultList } from '../../components/ResultList'
 import { ToolPage } from '../../components/ToolPage'
 import { compressJpegKeepExif } from '../../lib/exif'
-import { formatBytes } from '../../lib/image'
+import { sizeDeltaNote } from '../../lib/image'
 import { useBatch } from '../../lib/useBatch'
 import { usePersistedState } from '../../lib/usePersistedState'
 
@@ -21,8 +21,7 @@ export default function CompressExif() {
         quality,
         maxEdge: Number(maxEdge) > 0 ? Number(maxEdge) : undefined,
       })
-      const saved = Math.max(0, Math.round((1 - blob.size / file.size) * 100))
-      return { name: file.name, blob, original: file, note: `原 ${formatBytes(file.size)} → 减小 ${saved}% · EXIF 已保留` }
+      return { name: file.name, blob, original: file, note: `${sizeDeltaNote(file.size, blob.size)} · EXIF 已保留` }
     })
 
   return (

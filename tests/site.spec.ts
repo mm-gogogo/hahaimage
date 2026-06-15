@@ -110,6 +110,33 @@ test.describe('站点框架', () => {
     await expect(page.locator('.file-item .name')).toHaveText('pasted.png')
   })
 
+  test('无障碍：首个 Tab 命中跳转链接并可跳到主内容', async ({ page }) => {
+    await page.goto('/#/')
+    await page.keyboard.press('Tab')
+    const focusedClass = await page.evaluate(() => document.activeElement?.className)
+    expect(focusedClass).toContain('skip-link')
+    await page.keyboard.press('Enter')
+    const focusedId = await page.evaluate(() => document.activeElement?.id)
+    expect(focusedId).toBe('main-content')
+  })
+
+  test('页脚链接触控目标 ≥40px', async ({ page }) => {
+    await page.goto('/#/')
+    const heights = await page.locator('.site-footer .links a').evaluateAll(els =>
+      els.map(e => Math.round(e.getBoundingClientRect().height)),
+    )
+    expect(heights.length).toBeGreaterThanOrEqual(3)
+    expect(Math.min(...heights)).toBeGreaterThanOrEqual(40)
+  })
+
+  test('未知路由显示 404 兜底页并可返回', async ({ page }) => {
+    await page.goto('/#/this-tool-does-not-exist')
+    await expect(page.locator('.notfound-code')).toHaveText('404')
+    await expect(page.getByRole('heading', { name: '没有找到这个页面' })).toBeVisible()
+    await page.getByRole('link', { name: /返回全部工具/ }).click()
+    await expect(page.locator('.tool-card')).toHaveCount(19)
+  })
+
   test('移动端 375px 无横向滚动', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 720 })
     await page.goto('/#/')

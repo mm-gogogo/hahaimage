@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useState, useSyncExternalStore } from 'react'
+import { Suspense, lazy, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { Link, Route, Routes, useLocation } from 'react-router-dom'
 import { DropOverlay } from './components/DropOverlay'
 import { Icon } from './components/Icon'
@@ -7,6 +7,7 @@ import Home from './pages/Home'
 import { allTools } from './tools'
 
 const Admin = lazy(() => import('./pages/Admin'))
+const NotFound = lazy(() => import('./pages/NotFound'))
 
 const REPO_URL = 'https://github.com/mm-gogogo/hahaimage'
 
@@ -20,8 +21,15 @@ function initTheme(): Theme {
 
 function ScrollReset() {
   const { pathname } = useLocation()
+  const first = useRef(true)
   useEffect(() => {
     window.scrollTo(0, 0)
+    // 首次加载不抢焦点，保证第一次 Tab 命中 skip link；
+    // 后续路由切换才把焦点移到主内容（便于屏幕阅读器播报新页面）
+    if (first.current) {
+      first.current = false
+      return
+    }
     document.querySelector('main')?.focus({ preventScroll: true })
   }, [pathname])
   return null
@@ -39,6 +47,7 @@ function RoutedContent() {
           {allTools.map(tool => (
             <Route key={tool.path} path={tool.path} element={<tool.component />} />
           ))}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
     </Suspense>
@@ -63,6 +72,9 @@ export default function App() {
 
   return (
     <>
+      <a href="#main-content" className="skip-link">
+        跳到主要内容
+      </a>
       <DropOverlay />
       <header className="site-header">
         <div className="container">
@@ -88,7 +100,7 @@ export default function App() {
         </div>
       </header>
 
-      <main tabIndex={-1} style={{ outline: 'none' }}>
+      <main id="main-content" tabIndex={-1} style={{ outline: 'none' }}>
         <ScrollReset />
         <RoutedContent />
       </main>
@@ -98,17 +110,15 @@ export default function App() {
           <p>
             哈哈图片是一个开源项目，所有图片处理均在浏览器本地完成，不收集、不上传你的任何文件。
           </p>
-          <p>
+          <div className="links">
             <a href={REPO_URL} target="_blank" rel="noreferrer">
               GitHub 源码
             </a>
-            {' · '}
             <a href={`${REPO_URL}/issues`} target="_blank" rel="noreferrer">
               反馈问题
             </a>
-            {' · '}
             <Link to="/admin">站点配置</Link>
-          </p>
+          </div>
           <FooterExtra />
         </div>
       </footer>
