@@ -110,6 +110,25 @@ test.describe('站点框架', () => {
     await expect(page.locator('.file-item .name')).toHaveText('pasted.png')
   })
 
+  test('无障碍：首个 Tab 命中跳转链接并可跳到主内容', async ({ page }) => {
+    await page.goto('/#/')
+    await page.keyboard.press('Tab')
+    const focusedClass = await page.evaluate(() => document.activeElement?.className)
+    expect(focusedClass).toContain('skip-link')
+    await page.keyboard.press('Enter')
+    const focusedId = await page.evaluate(() => document.activeElement?.id)
+    expect(focusedId).toBe('main-content')
+  })
+
+  test('页脚链接触控目标 ≥40px', async ({ page }) => {
+    await page.goto('/#/')
+    const heights = await page.locator('.site-footer .links a').evaluateAll(els =>
+      els.map(e => Math.round(e.getBoundingClientRect().height)),
+    )
+    expect(heights.length).toBeGreaterThanOrEqual(3)
+    expect(Math.min(...heights)).toBeGreaterThanOrEqual(40)
+  })
+
   test('移动端 375px 无横向滚动', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 720 })
     await page.goto('/#/')

@@ -852,12 +852,46 @@ a:hover > .thumb {
   display: grid;
   gap: var(--space-xs);
 }
-.site-footer a {
-  color: var(--ink);
-  text-decoration-color: var(--border-strong);
+/* 链接行用 flex + 间距，让每个链接有舒适的点按区域（≥40px 高） */
+.site-footer .links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
 }
-.site-footer a:hover {
+.site-footer .links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--border-strong);
+  text-underline-offset: 3px;
+}
+.site-footer .links a:hover {
   color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+
+/* ===== skip link（键盘无障碍：聚焦时从顶部滑入） ===== */
+.skip-link {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -120%);
+  z-index: calc(var(--z-overlay) + 1);
+  padding: 10px 18px;
+  border-radius: 0 0 var(--radius) var(--radius);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform var(--dur) var(--ease-out);
+}
+.skip-link:focus-visible {
+  transform: translate(-50%, 0);
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
 
 /* ===== misc ===== */
