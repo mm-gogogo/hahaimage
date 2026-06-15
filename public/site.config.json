@@ -1,0 +1,11 @@
+{
+  "site": {
+    "name": "哈哈图片",
+    "footerText": ""
+  },
+  "analytics": {},
+  "ads": {
+    "enabled": false,
+    "slots": {}
+  }
+}
