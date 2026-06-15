@@ -2,7 +2,8 @@
  * genre: modern-minimal · theme: custom (vibe: "warm paper, friendly orange, precise tool")
  * paper oklch(98.5% 0.004 85) · accent oklch(60% 0.17 42) warm-orange · system font stack (CJK perf)
  * axes: light / system-native / warm · studied: no
- * Hallmark · pre-emit critique: P4 H5 E4 S4 R5 V4
+ * 分类色相识别（图片橙/GIF紫/视频蓝/AI青绿）+ 卡片 hover 强调条/箭头/图标微动
+ * Hallmark · pre-emit critique: P5 H5 E5 S5 R4 V5
  */
 
 :root {
@@ -25,6 +26,16 @@
   --err: oklch(55% 0.19 25);
   --err-tint: oklch(95% 0.025 25);
   --focus: oklch(55% 0.15 250);
+
+  /* 分类色相：克制的中等彩度，便于扫描区分（亮色） */
+  --cat-image: oklch(60% 0.17 42);
+  --cat-image-tint: oklch(95% 0.025 50);
+  --cat-gif: oklch(55% 0.16 300);
+  --cat-gif-tint: oklch(95% 0.03 300);
+  --cat-video: oklch(56% 0.13 245);
+  --cat-video-tint: oklch(95% 0.03 245);
+  --cat-ai: oklch(56% 0.12 168);
+  --cat-ai-tint: oklch(95% 0.035 168);
 
   /* type */
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
@@ -86,4 +97,14 @@
   --err: oklch(70% 0.16 25);
   --err-tint: oklch(28% 0.04 25);
   --focus: oklch(72% 0.13 250);
+
+  /* 分类色相（暗色）：提亮主色、压暗底色 */
+  --cat-image: oklch(70% 0.16 45);
+  --cat-image-tint: oklch(30% 0.05 45);
+  --cat-gif: oklch(70% 0.15 300);
+  --cat-gif-tint: oklch(30% 0.05 300);
+  --cat-video: oklch(70% 0.13 245);
+  --cat-video-tint: oklch(30% 0.05 245);
+  --cat-ai: oklch(72% 0.12 168);
+  --cat-ai-tint: oklch(30% 0.05 168);
 }

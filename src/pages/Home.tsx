@@ -28,7 +28,9 @@ export default function Home() {
   return (
     <div className="container">
       <section className="home-hero">
-        <h1>免费开源的在线图片工具箱</h1>
+        <h1>
+          免费开源的在线<span className="accent">图片工具箱</span>
+        </h1>
         <p className="sub">转换、压缩、裁剪、加水印、GIF 处理、视频转 GIF、AI 抠图——打开就能用。</p>
         <p className="privacy-pill">
           <Icon name="shield" size={16} />
@@ -50,14 +52,14 @@ export default function Home() {
       <AdSlot id="home-top" />
 
       {!query.trim() && recent.length > 0 && (
-        <section className="cat-section" aria-labelledby="cat-recent">
+        <section className="cat-section" data-cat="recent" aria-labelledby="cat-recent">
           <h2 id="cat-recent">
             最近使用
             <span className="cat-count">{recent.length} 个工具</span>
           </h2>
           <div className="tool-grid">
             {recent.map(tool => (
-              <Link to={tool.path} className="tool-card" key={`recent-${tool.path}`}>
+              <Link to={tool.path} className="tool-card" data-cat={tool.catId} key={`recent-${tool.path}`}>
                 <span className="tool-icon">
                   <Icon name={tool.icon} size={22} />
                 </span>
@@ -78,14 +80,14 @@ export default function Home() {
       )}
 
       {filtered.map(cat => (
-        <section key={cat.id} className="cat-section" aria-labelledby={`cat-${cat.id}`}>
+        <section key={cat.id} className="cat-section" data-cat={cat.id} aria-labelledby={`cat-${cat.id}`}>
           <h2 id={`cat-${cat.id}`}>
             {cat.name}
             <span className="cat-count">{cat.tools.length} 个工具</span>
           </h2>
           <div className="tool-grid">
             {cat.tools.map(tool => (
-              <Link to={tool.path} className="tool-card" key={tool.path}>
+              <Link to={tool.path} className="tool-card" data-cat={cat.id} key={tool.path}>
                 <span className="tool-icon">
                   <Icon name={tool.icon} size={22} />
                 </span>

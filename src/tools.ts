@@ -7,6 +7,8 @@ export interface ToolDef {
   desc: string
   icon: IconName
   component: LazyExoticComponent<ComponentType>
+  /** 所属分类 id，构建 allTools 时回填（用于"最近使用"的分类配色） */
+  catId?: string
 }
 
 export interface ToolCategory {
@@ -176,4 +178,6 @@ export const categories: ToolCategory[] = [
   },
 ]
 
-export const allTools: ToolDef[] = categories.flatMap(c => c.tools)
+export const allTools: ToolDef[] = categories.flatMap(c =>
+  c.tools.map(t => ({ ...t, catId: c.id })),
+)
