@@ -19,10 +19,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # 首次运行时自动启用仓库的 GitHub Pages（Source: GitHub Actions），无需手动设置
+      # 需在仓库 Settings → Pages 把 Source 设为 "GitHub Actions"（仅首次，一次性）
       - uses: actions/configure-pages@v5
-        with:
-          enablement: true
       - uses: actions/setup-node@v4
         with:
           node-version: 22
