@@ -796,6 +796,36 @@ a:hover > .thumb {
   box-shadow: 0 0 0 9999px color-mix(in oklch, var(--ink) 45%, transparent);
   cursor: move;
 }
+/* 三分构图辅助线：两横两竖，hover/拖动选区时更清晰 */
+.crop-thirds {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image:
+    linear-gradient(color-mix(in oklch, white 70%, transparent) 0 0),
+    linear-gradient(color-mix(in oklch, white 70%, transparent) 0 0),
+    linear-gradient(color-mix(in oklch, white 70%, transparent) 0 0),
+    linear-gradient(color-mix(in oklch, white 70%, transparent) 0 0);
+  background-repeat: no-repeat;
+  background-size:
+    1px 100%, 1px 100%, 100% 1px, 100% 1px;
+  background-position:
+    33.33% 0, 66.66% 0, 0 33.33%, 0 66.66%;
+}
+.crop-dim {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  background: color-mix(in oklch, var(--ink) 62%, transparent);
+  color: var(--paper);
+  pointer-events: none;
+  white-space: nowrap;
+}
 .crop-handle {
   position: absolute;
   width: 14px;
@@ -803,6 +833,7 @@ a:hover > .thumb {
   background: var(--paper);
   border: 2px solid var(--accent);
   border-radius: 50%;
+  box-shadow: 0 1px 3px color-mix(in oklch, var(--ink) 40%, transparent);
 }
 .crop-handle[data-h="nw"] { top: -7px; left: -7px; cursor: nwse-resize; }
 .crop-handle[data-h="ne"] { top: -7px; right: -7px; cursor: nesw-resize; }
