@@ -4,7 +4,7 @@ import { FileDrop } from '../../components/FileDrop'
 import { ResultList, type ResultItem } from '../../components/ResultList'
 import { ToolPage } from '../../components/ToolPage'
 import { runFFmpeg } from '../../lib/ffmpeg'
-import { baseName, formatBytes } from '../../lib/image'
+import { baseName, formatBytes, sizeDeltaNote } from '../../lib/image'
 import { useFFmpegJob } from '../../lib/useFFmpegJob'
 
 type Target = 'webp' | 'apng'
@@ -35,14 +35,7 @@ export default function GifConvert() {
       const mime = target === 'webp' ? 'image/webp' : 'image/png'
       const ext = target === 'webp' ? 'webp' : 'png'
       const blob = new Blob([out.data as BlobPart], { type: mime })
-      const saved = Math.round((1 - blob.size / file.size) * 100)
-      setResults([
-        {
-          name: `${baseName(file.name)}.${ext}`,
-          blob,
-          note: saved > 0 ? `原 ${formatBytes(file.size)} → 减小 ${saved}%` : `原 ${formatBytes(file.size)}`,
-        },
-      ])
+      setResults([{ name: `${baseName(file.name)}.${ext}`, blob, note: sizeDeltaNote(file.size, blob.size) }])
     })
   }
 

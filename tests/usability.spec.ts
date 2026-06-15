@@ -49,6 +49,26 @@ test.describe('易用性', () => {
     await expect(page.locator('.result-item')).toHaveCount(1, { timeout: 300000 })
   })
 
+  test('诚实体积文案：变大显示增大而非"减小 0%"', async ({ page }) => {
+    await page.goto('/#/compress')
+    // 极小图压成 JPG 通常会变大
+    const tiny = await page.evaluate(() => {
+      const c = document.createElement('canvas')
+      c.width = 64
+      c.height = 48
+      const x = c.getContext('2d')!
+      x.fillStyle = '#3a6'
+      x.fillRect(0, 0, 64, 48)
+      return c.toDataURL('image/png').split(',')[1]
+    })
+    await upload(page, { name: 'tiny.png', mimeType: 'image/png', buffer: Buffer.from(tiny, 'base64') })
+    await page.getByRole('button', { name: /开始压缩/ }).click()
+    await expect(page.locator('.result-item')).toHaveCount(1)
+    const note = await page.locator('.result-item .note').textContent()
+    expect(note).not.toContain('减小 0%')
+    expect(note).toMatch(/增大|体积基本不变|减小/)
+  })
+
   test('视频转 GIF 参数记忆', async ({ page }) => {
     await page.goto('/#/video-to-gif')
     await page.getByLabel('帧率').selectOption('5')

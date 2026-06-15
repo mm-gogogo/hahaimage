@@ -582,6 +582,7 @@ input[type="radio"] {
   border: 1px solid var(--border-strong);
   border-radius: var(--radius);
   overflow: hidden;
+  background: var(--paper-2);
 }
 .seg button {
   min-height: 40px;
@@ -590,17 +591,21 @@ input[type="radio"] {
   background: transparent;
   cursor: pointer;
   font-size: var(--text-sm);
-  transition: background var(--dur-fast) var(--ease-out);
+  font-weight: 500;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
 }
 .seg button + button {
   border-left: 1px solid var(--border-strong);
 }
 .seg button:hover {
-  background: var(--paper-2);
+  background: color-mix(in oklch, var(--paper) 70%, transparent);
 }
 .seg button[aria-pressed="true"] {
   background: var(--accent);
   color: var(--on-accent);
+  box-shadow: 0 1px 3px color-mix(in oklch, var(--accent) 35%, transparent);
 }
 
 /* ===== progress / messages ===== */
@@ -681,6 +686,14 @@ input[type="radio"] {
   border-radius: var(--radius);
   padding: var(--space-xs) var(--space-sm);
   min-width: 0;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+.result-item:hover,
+.file-item:hover {
+  border-color: var(--border-strong);
+  background: color-mix(in oklch, var(--paper-2) 50%, var(--paper));
 }
 .result-compare {
   flex-basis: 100%;
@@ -701,6 +714,14 @@ input[type="radio"] {
   background:
     conic-gradient(var(--paper-3) 0 25%, transparent 0 50%, var(--paper-3) 0 75%, transparent 0)
     0 0 / 16px 16px;
+  transition:
+    transform var(--dur) var(--ease-out),
+    box-shadow var(--dur) var(--ease-out);
+}
+/* 缩略图是可点开原图的链接，hover 时轻微放大提示可交互 */
+a:hover > .thumb {
+  transform: scale(1.06);
+  box-shadow: 0 4px 12px -4px color-mix(in oklch, var(--ink) 30%, transparent);
 }
 .result-meta {
   min-width: 0;
