@@ -78,9 +78,26 @@ function ResultRow({ item, index }: { item: ResultItem; index: number }) {
 
 export function ResultList({ items, zipName = 'hahaimage.zip' }: { items: ResultItem[]; zipName?: string }) {
   if (items.length === 0) return null
+
+  // 批量汇总：所有结果都带原图时，统计总体积变化
+  const withOriginal = items.filter(it => it.original)
+  const summary =
+    items.length > 1 && withOriginal.length === items.length
+      ? (() => {
+          const origTotal = withOriginal.reduce((s, it) => s + it.original!.size, 0)
+          const newTotal = items.reduce((s, it) => s + it.blob.size, 0)
+          const pct = Math.round((1 - newTotal / origTotal) * 100)
+          const dir = pct >= 1 ? `减小 ${pct}%` : pct <= -1 ? `增大 ${Math.abs(pct)}%` : '体积基本不变'
+          return `共 ${formatBytes(origTotal)} → ${formatBytes(newTotal)}（${dir}）`
+        })()
+      : null
+
   return (
     <div className="panel" aria-live="polite">
-      <h2>处理结果（{items.length} 个文件）</h2>
+      <h2>
+        处理结果（{items.length} 个文件）
+        {summary && <span className="result-summary">{summary}</span>}
+      </h2>
       <div className="result-list">
         {items.map((it, i) => (
           <ResultRow key={`${it.name}-${i}`} item={it} index={i} />

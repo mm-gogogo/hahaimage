@@ -770,6 +770,18 @@ input[type="radio"] {
   flex-basis: 100%;
   padding-top: var(--space-xs);
 }
+/* 批量结果总览：跟在标题后的中性信息徽标（不暗示好坏） */
+.result-summary {
+  margin-left: 10px;
+  font-size: var(--text-sm);
+  font-weight: 400;
+  color: var(--muted);
+  background: var(--paper-2);
+  border: var(--rule);
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-variant-numeric: tabular-nums;
+}
 .btn.is-active-toggle {
   background: var(--accent);
   border-color: var(--accent);
