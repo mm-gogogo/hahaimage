@@ -1,9 +1,11 @@
 import { useState } from 'react'
+import { FFmpegRunner } from '../../components/FFmpegRunner'
 import { FileDrop } from '../../components/FileDrop'
 import { ResultList, type ResultItem } from '../../components/ResultList'
 import { ToolPage } from '../../components/ToolPage'
 import { runFFmpeg } from '../../lib/ffmpeg'
 import { baseName, formatBytes } from '../../lib/image'
+import { useFFmpegJob } from '../../lib/useFFmpegJob'
 
 type Target = 'webp' | 'apng'
 
@@ -12,18 +14,12 @@ export default function GifConvert() {
   const [target, setTarget] = useState<Target>('webp')
   const [quality, setQuality] = useState(80)
   const [results, setResults] = useState<ResultItem[]>([])
-  const [busy, setBusy] = useState(false)
-  const [status, setStatus] = useState('')
-  const [progress, setProgress] = useState(0)
-  const [error, setError] = useState('')
+  const job = useFFmpegJob()
 
-  const run = async () => {
+  const start = () => {
     if (!file) return
-    setBusy(true)
-    setError('')
     setResults([])
-    setProgress(0)
-    try {
+    job.run(async () => {
       const args =
         target === 'webp'
           ? ['-i', 'input.gif', '-loop', '0', '-quality', String(quality), 'output.webp']
@@ -33,8 +29,8 @@ export default function GifConvert() {
         inputs: [{ name: 'input.gif', data: file }],
         args,
         outputs: [outName],
-        onProgress: setProgress,
-        onStatus: setStatus,
+        onProgress: job.setProgress,
+        onStatus: job.setStatus,
       })
       const mime = target === 'webp' ? 'image/webp' : 'image/png'
       const ext = target === 'webp' ? 'webp' : 'png'
@@ -47,11 +43,7 @@ export default function GifConvert() {
           note: saved > 0 ? `原 ${formatBytes(file.size)} → 减小 ${saved}%` : `原 ${formatBytes(file.size)}`,
         },
       ])
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e))
-    } finally {
-      setBusy(false)
-    }
+    })
   }
 
   return (
@@ -80,17 +72,7 @@ export default function GifConvert() {
             <input id="gv-q" type="range" min={10} max={100} value={quality} onChange={e => setQuality(Number(e.target.value))} />
           </div>
         )}
-        {busy && (
-          <div className="field" role="status">
-            <span className="help">{status}</span>
-            <div className="progress"><i style={{ width: `${Math.round(progress * 100)}%` }} /></div>
-          </div>
-        )}
-        {error && <p className="msg msg-error">{error}</p>}
-        <button className={`btn btn-primary${busy ? ' is-loading' : ''}`} disabled={!file || busy} onClick={run}>
-          {busy && <span className="spinner" />}
-          {busy ? '转换中…' : `转换为 ${target === 'webp' ? 'WebP' : 'APNG'}`}
-        </button>
+        <FFmpegRunner label={`转换为 ${target === 'webp' ? 'WebP' : 'APNG'}`} busy={job.busy} status={job.status} progress={job.progress} error={job.error} disabled={!file} onRun={start} onCancel={job.cancel} />
       </div>
 
       <ResultList items={results} />

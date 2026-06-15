@@ -1,23 +1,24 @@
 import { useEffect, useRef, useState } from 'react'
+import { BatchRunner } from '../../components/BatchRunner'
 import { FileDrop } from '../../components/FileDrop'
 import { FileList } from '../../components/FileList'
-import { ResultList, type ResultItem } from '../../components/ResultList'
+import { ResultList } from '../../components/ResultList'
 import { ToolPage } from '../../components/ToolPage'
 import { MIME_EXT, canvasToBlob, loadImage, replaceExt } from '../../lib/image'
+import { useBatch } from '../../lib/useBatch'
+import { usePersistedState } from '../../lib/usePersistedState'
 import { POSITIONS, type Position, type WmType, renderWatermark } from '../../lib/watermark'
 
 export default function Watermark() {
   const [files, setFiles] = useState<File[]>([])
-  const [wmType, setWmType] = useState<WmType>('text')
-  const [text, setText] = useState('哈哈图片')
-  const [color, setColor] = useState('#ffffff')
+  const [wmType, setWmType] = usePersistedState<WmType>('watermark.type', 'text')
+  const [text, setText] = usePersistedState('watermark.text', '哈哈图片')
+  const [color, setColor] = usePersistedState('watermark.color', '#ffffff')
   const [wmImage, setWmImage] = useState<File | null>(null)
-  const [position, setPosition] = useState<Position>('se')
-  const [opacity, setOpacity] = useState(0.5)
-  const [sizePct, setSizePct] = useState(6)
-  const [results, setResults] = useState<ResultItem[]>([])
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState('')
+  const [position, setPosition] = usePersistedState<Position>('watermark.position', 'se')
+  const [opacity, setOpacity] = usePersistedState('watermark.opacity', 0.5)
+  const [sizePct, setSizePct] = usePersistedState('watermark.sizePct', 6)
+  const { results, busy, done, total, error, run, cancel, setError } = useBatch()
 
   const previewRef = useRef<HTMLCanvasElement>(null)
   const [previewSrc, setPreviewSrc] = useState<HTMLImageElement | null>(null)
@@ -57,34 +58,26 @@ export default function Watermark() {
     ctx.drawImage(full, 0, 0, canvas.width, canvas.height)
   }, [previewSrc, wmType, text, color, position, opacity, sizePct, wmImgEl])
 
-  const run = async () => {
-    setBusy(true)
-    setError('')
-    setResults([])
-    try {
-      if (wmType === 'image' && !wmImage) throw new Error('请先上传水印图片')
-      const wmImg = wmType === 'image' && wmImage ? await loadImage(wmImage) : null
-      const out: ResultItem[] = []
-      for (const file of files) {
-        const img = await loadImage(file)
-        const canvas = renderWatermark(img, { type: wmType, text, color, position, opacity, sizePct, image: wmImg })
-        const mime = MIME_EXT[file.type] ? file.type : 'image/png'
-        const blob = await canvasToBlob(canvas, mime, mime === 'image/png' ? undefined : 0.92)
-        out.push({ name: replaceExt(file.name, MIME_EXT[mime]), blob, original: file })
-      }
-      setResults(out)
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e))
-    } finally {
-      setBusy(false)
+  const start = async () => {
+    if (wmType === 'image' && !wmImage) {
+      setError('请先上传水印图片')
+      return
     }
+    const wmImg = wmType === 'image' && wmImage ? await loadImage(wmImage) : null
+    run(files, async file => {
+      const img = await loadImage(file)
+      const canvas = renderWatermark(img, { type: wmType, text, color, position, opacity, sizePct, image: wmImg })
+      const mime = MIME_EXT[file.type] ? file.type : 'image/png'
+      const blob = await canvasToBlob(canvas, mime, mime === 'image/png' ? undefined : 0.92)
+      return { name: replaceExt(file.name, MIME_EXT[mime]), blob, original: file }
+    })
   }
 
   return (
     <ToolPage title="图片加水印" desc="为图片添加文字或图片水印，支持九宫格定位与全图平铺，可批量处理多张图片。调整参数即可实时预览效果。">
       <div className="panel">
         <FileDrop accept="image/*" multiple onFiles={f => setFiles(prev => [...prev, ...f])} hint="要加水印的图片，可多选" />
-        <FileList files={files} onRemove={i => setFiles(files.filter((_, j) => j !== i))} />
+        <FileList files={files} onRemove={i => setFiles(files.filter((_, j) => j !== i))} onClear={() => setFiles([])} />
       </div>
 
       <div className="panel">
@@ -136,11 +129,16 @@ export default function Watermark() {
           <label htmlFor="wm-op">不透明度：{Math.round(opacity * 100)}%</label>
           <input id="wm-op" type="range" min={5} max={100} value={Math.round(opacity * 100)} onChange={e => setOpacity(Number(e.target.value) / 100)} />
         </div>
-        {error && <p className="msg msg-error">{error}</p>}
-        <button className={`btn btn-primary${busy ? ' is-loading' : ''}`} disabled={files.length === 0 || busy} onClick={run}>
-          {busy && <span className="spinner" />}
-          {busy ? '处理中…' : `添加水印（${files.length} 个文件）`}
-        </button>
+        <BatchRunner
+          label={`添加水印（${files.length} 个文件）`}
+          busy={busy}
+          done={done}
+          total={total}
+          error={error}
+          disabled={files.length === 0}
+          onRun={start}
+          onCancel={cancel}
+        />
       </div>
 
       {previewSrc && (

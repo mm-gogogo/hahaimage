@@ -632,6 +632,21 @@ input[type="radio"] {
   display: grid;
   gap: var(--space-xs);
 }
+.file-list {
+  display: grid;
+  gap: var(--space-xs);
+}
+.file-list-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+.file-list-count {
+  font-size: var(--text-sm);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
 .result-item,
 .file-item {
   display: flex;

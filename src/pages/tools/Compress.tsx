@@ -1,52 +1,41 @@
 import { useState } from 'react'
+import { BatchRunner } from '../../components/BatchRunner'
 import { FileDrop } from '../../components/FileDrop'
 import { FileList } from '../../components/FileList'
-import { ResultList, type ResultItem } from '../../components/ResultList'
+import { ResultList } from '../../components/ResultList'
 import { ToolPage } from '../../components/ToolPage'
 import { MIME_EXT, compressImage, formatBytes, replaceExt } from '../../lib/image'
+import { useBatch } from '../../lib/useBatch'
+import { usePersistedState } from '../../lib/usePersistedState'
 
 export default function Compress() {
   const [files, setFiles] = useState<File[]>([])
-  const [mime, setMime] = useState<'image/jpeg' | 'image/webp'>('image/jpeg')
-  const [quality, setQuality] = useState(0.75)
-  const [maxEdge, setMaxEdge] = useState('')
-  const [results, setResults] = useState<ResultItem[]>([])
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState('')
+  const [mime, setMime] = usePersistedState<'image/jpeg' | 'image/webp'>('compress.mime', 'image/jpeg')
+  const [quality, setQuality] = usePersistedState('compress.quality', 0.75)
+  const [maxEdge, setMaxEdge] = usePersistedState('compress.maxEdge', '')
+  const { results, busy, done, total, error, run, cancel } = useBatch()
 
-  const run = async () => {
-    setBusy(true)
-    setError('')
-    setResults([])
-    try {
-      const out: ResultItem[] = []
-      for (const file of files) {
-        const blob = await compressImage(file, {
-          type: mime,
-          quality,
-          maxEdge: Number(maxEdge) > 0 ? Number(maxEdge) : undefined,
-        })
-        const saved = Math.max(0, Math.round((1 - blob.size / file.size) * 100))
-        out.push({
-          name: replaceExt(file.name, MIME_EXT[mime]),
-          blob,
-          original: file,
-          note: `原 ${formatBytes(file.size)} → 减小 ${saved}%`,
-        })
+  const start = () =>
+    run(files, async file => {
+      const blob = await compressImage(file, {
+        type: mime,
+        quality,
+        maxEdge: Number(maxEdge) > 0 ? Number(maxEdge) : undefined,
+      })
+      const saved = Math.max(0, Math.round((1 - blob.size / file.size) * 100))
+      return {
+        name: replaceExt(file.name, MIME_EXT[mime]),
+        blob,
+        original: file,
+        note: `原 ${formatBytes(file.size)} → 减小 ${saved}%`,
       }
-      setResults(out)
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e))
-    } finally {
-      setBusy(false)
-    }
-  }
+    })
 
   return (
     <ToolPage title="压缩图片" desc="通过调节编码质量与尺寸上限来减小图片体积，支持批量处理。输出 JPG 或 WebP（WebP 通常更小）。">
       <div className="panel">
         <FileDrop accept="image/*" multiple onFiles={f => setFiles(prev => [...prev, ...f])} hint="支持 PNG / JPG / WebP 等，可多选" />
-        <FileList files={files} onRemove={i => setFiles(files.filter((_, j) => j !== i))} />
+        <FileList files={files} onRemove={i => setFiles(files.filter((_, j) => j !== i))} onClear={() => setFiles([])} />
       </div>
 
       <div className="panel">
@@ -69,11 +58,16 @@ export default function Compress() {
           <input id="cp-q" type="range" min={5} max={100} value={Math.round(quality * 100)} onChange={e => setQuality(Number(e.target.value) / 100)} />
           <span className="help">70% - 85% 通常在体积和画质之间最平衡</span>
         </div>
-        {error && <p className="msg msg-error">{error}</p>}
-        <button className={`btn btn-primary${busy ? ' is-loading' : ''}`} disabled={files.length === 0 || busy} onClick={run}>
-          {busy && <span className="spinner" />}
-          {busy ? '压缩中…' : `开始压缩（${files.length} 个文件）`}
-        </button>
+        <BatchRunner
+          label={`开始压缩（${files.length} 个文件）`}
+          busy={busy}
+          done={done}
+          total={total}
+          error={error}
+          disabled={files.length === 0}
+          onRun={start}
+          onCancel={cancel}
+        />
       </div>
 
       <ResultList items={results} zipName="compressed.zip" />

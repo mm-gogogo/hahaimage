@@ -1,29 +1,26 @@
 import { useState } from 'react'
+import { FFmpegRunner } from '../../components/FFmpegRunner'
 import { FileDrop } from '../../components/FileDrop'
 import { ResultList, type ResultItem } from '../../components/ResultList'
 import { ToolPage } from '../../components/ToolPage'
 import { runFFmpeg } from '../../lib/ffmpeg'
 import { paletteFilter } from '../../lib/gif'
 import { baseName, formatBytes } from '../../lib/image'
+import { useFFmpegJob } from '../../lib/useFFmpegJob'
+import { usePersistedState } from '../../lib/usePersistedState'
 
 export default function GifCompress() {
   const [file, setFile] = useState<File | null>(null)
-  const [fps, setFps] = useState('0')
-  const [scale, setScale] = useState('100')
-  const [colors, setColors] = useState('128')
+  const [fps, setFps] = usePersistedState('gifCompress.fps', '0')
+  const [scale, setScale] = usePersistedState('gifCompress.scale', '100')
+  const [colors, setColors] = usePersistedState('gifCompress.colors', '128')
   const [results, setResults] = useState<ResultItem[]>([])
-  const [busy, setBusy] = useState(false)
-  const [status, setStatus] = useState('')
-  const [progress, setProgress] = useState(0)
-  const [error, setError] = useState('')
+  const job = useFFmpegJob()
 
-  const run = async () => {
+  const start = () => {
     if (!file) return
-    setBusy(true)
-    setError('')
     setResults([])
-    setProgress(0)
-    try {
+    job.run(async () => {
       const pre: string[] = []
       if (Number(fps) > 0) pre.push(`fps=${fps}`)
       if (Number(scale) < 100) pre.push(`scale=iw*${Number(scale) / 100}:-1:flags=lanczos`)
@@ -31,17 +28,13 @@ export default function GifCompress() {
         inputs: [{ name: 'input.gif', data: file }],
         args: ['-i', 'input.gif', '-vf', paletteFilter(pre.join(','), Number(colors)), 'output.gif'],
         outputs: ['output.gif'],
-        onProgress: setProgress,
-        onStatus: setStatus,
+        onProgress: job.setProgress,
+        onStatus: job.setStatus,
       })
       const blob = new Blob([out.data as BlobPart], { type: 'image/gif' })
       const saved = Math.max(0, Math.round((1 - blob.size / file.size) * 100))
       setResults([{ name: `${baseName(file.name)}_compressed.gif`, blob, note: `原 ${formatBytes(file.size)} → 减小 ${saved}%` }])
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e))
-    } finally {
-      setBusy(false)
-    }
+    })
   }
 
   return (
@@ -83,17 +76,7 @@ export default function GifCompress() {
             </select>
           </div>
         </div>
-        {busy && (
-          <div className="field" role="status">
-            <span className="help">{status}</span>
-            <div className="progress"><i style={{ width: `${Math.round(progress * 100)}%` }} /></div>
-          </div>
-        )}
-        {error && <p className="msg msg-error">{error}</p>}
-        <button className={`btn btn-primary${busy ? ' is-loading' : ''}`} disabled={!file || busy} onClick={run}>
-          {busy && <span className="spinner" />}
-          {busy ? '压缩中…' : '开始压缩'}
-        </button>
+        <FFmpegRunner label="开始压缩" busy={job.busy} status={job.status} progress={job.progress} error={job.error} disabled={!file} onRun={start} onCancel={job.cancel} />
       </div>
 
       <ResultList items={results} />
