@@ -33,7 +33,7 @@ export default function Convert() {
           bg: mime === 'image/jpeg' ? '#ffffff' : undefined,
         })
         const blob = await canvasToBlob(canvas, mime, lossy ? quality : undefined)
-        out.push({ name: replaceExt(file.name, MIME_EXT[mime]), blob })
+        out.push({ name: replaceExt(file.name, MIME_EXT[mime]), blob, original: file })
       }
       setResults(out)
     } catch (e) {

@@ -3,12 +3,59 @@ import { Link } from 'react-router-dom'
 import { AdSlot } from '../components/AdSlot'
 import { Icon } from '../components/Icon'
 import { getRecentPaths } from '../lib/recent'
-import { allTools, categories } from '../tools'
+import { useInView } from '../lib/useInView'
+import { allTools, categories, type ToolDef } from '../tools'
+
+function ToolCard({ tool, catId, index }: { tool: ToolDef; catId: string; index: number }) {
+  return (
+    <Link to={tool.path} className="tool-card" data-cat={catId} style={{ '--i': index } as React.CSSProperties}>
+      <span className="tool-icon">
+        <Icon name={tool.icon} size={22} />
+      </span>
+      <span>
+        <h3>{tool.name}</h3>
+        <p>{tool.desc}</p>
+      </span>
+    </Link>
+  )
+}
+
+function CategorySection({
+  id,
+  name,
+  tools,
+  labelId,
+}: {
+  id: string
+  name: string
+  tools: ToolDef[]
+  labelId: string
+}) {
+  const [ref, inView] = useInView<HTMLElement>()
+  return (
+    <section
+      ref={ref}
+      className={`cat-section${inView ? ' is-revealed' : ''}`}
+      data-cat={id}
+      aria-labelledby={labelId}
+    >
+      <h2 id={labelId}>
+        {name}
+        <span className="cat-count">{tools.length} 个工具</span>
+      </h2>
+      <div className="tool-grid">
+        {tools.map((tool, i) => (
+          <ToolCard key={tool.path} tool={tool} catId={tool.catId ?? id} index={i} />
+        ))}
+      </div>
+    </section>
+  )
+}
 
 export default function Home() {
   const [query, setQuery] = useState('')
   const recent = useMemo(
-    () => getRecentPaths().map(p => allTools.find(t => t.path === p)).filter(t => t != null),
+    () => getRecentPaths().map(p => allTools.find(t => t.path === p)).filter((t): t is ToolDef => t != null),
     [],
   )
 
@@ -52,25 +99,7 @@ export default function Home() {
       <AdSlot id="home-top" />
 
       {!query.trim() && recent.length > 0 && (
-        <section className="cat-section" data-cat="recent" aria-labelledby="cat-recent">
-          <h2 id="cat-recent">
-            最近使用
-            <span className="cat-count">{recent.length} 个工具</span>
-          </h2>
-          <div className="tool-grid">
-            {recent.map(tool => (
-              <Link to={tool.path} className="tool-card" data-cat={tool.catId} key={`recent-${tool.path}`}>
-                <span className="tool-icon">
-                  <Icon name={tool.icon} size={22} />
-                </span>
-                <span>
-                  <h3>{tool.name}</h3>
-                  <p>{tool.desc}</p>
-                </span>
-              </Link>
-            ))}
-          </div>
-        </section>
+        <CategorySection id="recent" name="最近使用" tools={recent} labelId="cat-recent" />
       )}
 
       {filtered.length === 0 && (
@@ -80,25 +109,7 @@ export default function Home() {
       )}
 
       {filtered.map(cat => (
-        <section key={cat.id} className="cat-section" data-cat={cat.id} aria-labelledby={`cat-${cat.id}`}>
-          <h2 id={`cat-${cat.id}`}>
-            {cat.name}
-            <span className="cat-count">{cat.tools.length} 个工具</span>
-          </h2>
-          <div className="tool-grid">
-            {cat.tools.map(tool => (
-              <Link to={tool.path} className="tool-card" data-cat={cat.id} key={tool.path}>
-                <span className="tool-icon">
-                  <Icon name={tool.icon} size={22} />
-                </span>
-                <span>
-                  <h3>{tool.name}</h3>
-                  <p>{tool.desc}</p>
-                </span>
-              </Link>
-            ))}
-          </div>
-        </section>
+        <CategorySection key={cat.id} id={cat.id} name={cat.name} tools={cat.tools} labelId={`cat-${cat.id}`} />
       ))}
 
       <AdSlot id="home-bottom" />

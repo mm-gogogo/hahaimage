@@ -30,6 +30,7 @@ export default function Compress() {
         out.push({
           name: replaceExt(file.name, MIME_EXT[mime]),
           blob,
+          original: file,
           note: `原 ${formatBytes(file.size)} → 减小 ${saved}%`,
         })
       }

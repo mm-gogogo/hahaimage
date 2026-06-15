@@ -1,0 +1,263 @@
+/* ============================================================
+ * 酷炫交互层：入场动画、滚动揭示、流光、对比滑块、全局拖拽覆盖层
+ * 全部仅动 transform/opacity；prefers-reduced-motion 下整体降级
+ * ============================================================ */
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes pop-in {
+  0% { opacity: 0; transform: scale(0.94); }
+  60% { transform: scale(1.01); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes shimmer-move {
+  to { background-position: 200% center; }
+}
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--accent) 45%, transparent); }
+  70% { box-shadow: 0 0 0 14px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+@keyframes sheen {
+  0% { transform: translateX(-120%) skewX(-18deg); }
+  100% { transform: translateX(320%) skewX(-18deg); }
+}
+@keyframes float-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ---- 路由切换：主区域淡入上浮 ---- */
+.route-fade {
+  animation: rise-in 0.42s var(--ease-out) both;
+}
+
+/* ---- 首页 hero ---- */
+.home-hero h1 {
+  animation: rise-in 0.5s var(--ease-out) both;
+}
+.home-hero .sub {
+  animation: rise-in 0.5s var(--ease-out) 0.06s both;
+}
+.home-hero .privacy-pill {
+  animation: rise-in 0.5s var(--ease-out) 0.12s both;
+}
+.home-hero .search-box {
+  animation: rise-in 0.5s var(--ease-out) 0.18s both;
+}
+/* hero 渐变标题持续流光 */
+.home-hero h1 .accent {
+  background-size: 200% auto;
+  animation: shimmer-move 6s linear infinite;
+}
+
+/* ---- 工具卡错落入场（滚动揭示）---- */
+.cat-section {
+  opacity: 0;
+}
+.cat-section.is-revealed {
+  animation: fade-in 0.4s var(--ease-out) both;
+}
+.cat-section.is-revealed .tool-card {
+  animation: rise-in 0.5s var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 45ms);
+}
+/* 卡片图标在 hover 时轻微浮动 */
+.tool-card:hover .tool-icon {
+  animation: float-bob 1.6s var(--ease-in-out) infinite;
+}
+
+/* ---- 结果项入场 ---- */
+.result-item {
+  animation: pop-in 0.4s var(--ease-out) both;
+}
+.result-item:nth-child(n) {
+  animation-delay: calc((var(--ri, 0)) * 60ms);
+}
+
+/* ---- 主按钮：press 反馈 + 完成脉冲 + 扫光 ---- */
+.btn-primary {
+  position: relative;
+  overflow: hidden;
+}
+.btn-primary:not(:disabled)::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklch, white 35%, transparent),
+    transparent
+  );
+  transform: translateX(-120%) skewX(-18deg);
+  pointer-events: none;
+}
+.btn-primary:not(:disabled):hover::after {
+  animation: sheen 0.9s var(--ease-out);
+}
+.btn-success-pulse {
+  animation: pulse-ring 0.8s var(--ease-out);
+}
+
+/* ---- 拖拽区呼吸 ---- */
+.dropzone.is-drag .dz-icon {
+  animation: float-bob 1.2s var(--ease-in-out) infinite;
+}
+
+/* ---- 全局拖拽覆盖层 ---- */
+.drop-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  display: grid;
+  place-items: center;
+  background: color-mix(in oklch, var(--paper) 70%, transparent);
+  backdrop-filter: blur(8px);
+  animation: fade-in 0.18s var(--ease-out) both;
+}
+.drop-overlay-inner {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-md);
+  padding: clamp(32px, 6vw, 64px);
+  border: 2px dashed var(--accent);
+  border-radius: var(--radius-lg);
+  background: color-mix(in oklch, var(--accent-tint) 60%, var(--paper));
+  color: var(--accent-strong);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  text-align: center;
+  animation: pop-in 0.24s var(--ease-out) both;
+  max-width: 80vw;
+}
+.drop-overlay-inner .dz-icon {
+  color: var(--accent);
+  animation: float-bob 1.4s var(--ease-in-out) infinite;
+}
+.drop-overlay-inner small {
+  font-size: var(--text-sm);
+  font-weight: 400;
+  color: var(--muted);
+}
+
+/* ---- Before / After 对比滑块 ---- */
+.ba-compare {
+  position: relative;
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: var(--rule);
+  touch-action: none;
+  user-select: none;
+  background:
+    conic-gradient(var(--paper-3) 0 25%, transparent 0 50%, var(--paper-3) 0 75%, transparent 0)
+    0 0 / 16px 16px;
+}
+.ba-compare img {
+  display: block;
+  max-height: 60vh;
+  width: auto;
+  max-width: 100%;
+  pointer-events: none;
+}
+.ba-after {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.ba-after img {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+}
+.ba-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--accent);
+  transform: translateX(-1px);
+  cursor: ew-resize;
+}
+.ba-handle::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 34px;
+  height: 34px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: 0 2px 8px -2px color-mix(in oklch, var(--ink) 40%, transparent);
+}
+.ba-handle::after {
+  content: '⟺';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--on-accent);
+  font-size: 15px;
+  line-height: 1;
+}
+.ba-label {
+  position: absolute;
+  top: 8px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: var(--text-xs);
+  font-weight: 500;
+  background: color-mix(in oklch, var(--ink) 62%, transparent);
+  color: var(--paper);
+  pointer-events: none;
+}
+.ba-label-before { left: 8px; }
+.ba-label-after { right: 8px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .route-fade,
+  .home-hero h1,
+  .home-hero .sub,
+  .home-hero .privacy-pill,
+  .home-hero .search-box,
+  .cat-section.is-revealed,
+  .cat-section.is-revealed .tool-card,
+  .result-item,
+  .drop-overlay,
+  .drop-overlay-inner {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+  }
+  .home-hero h1 .accent,
+  .tool-card:hover .tool-icon,
+  .drop-overlay-inner .dz-icon,
+  .btn-primary:not(:disabled):hover::after {
+    animation: none !important;
+  }
+  .cat-section { opacity: 1; }
+}

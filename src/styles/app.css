@@ -398,11 +398,24 @@ textarea {
   min-height: 32px;
 }
 .breadcrumb:hover {
-  color: var(--accent);
+  color: var(--card-accent, var(--accent));
 }
 .tool-head h1 {
   font-size: var(--text-2xl);
   font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+/* 标题前的分类色竖条，把首页色彩体系延续到工具页 */
+.tool-head h1::before {
+  content: '';
+  flex: none;
+  width: 4px;
+  align-self: stretch;
+  min-height: 1.1em;
+  border-radius: 999px;
+  background: var(--card-accent, var(--accent));
 }
 .tool-head .desc {
   color: var(--muted);
@@ -576,9 +589,22 @@ input[type="radio"] {
 .progress > i {
   display: block;
   height: 100%;
-  background: var(--accent);
   border-radius: 999px;
-  transition: width 0.2s var(--ease-out);
+  background: linear-gradient(
+    90deg,
+    var(--accent),
+    color-mix(in oklch, var(--accent) 55%, var(--cat-gif, var(--accent))),
+    var(--accent)
+  );
+  background-size: 200% 100%;
+  transition: width 0.25s var(--ease-out);
+  animation: progress-flow 1.4s linear infinite;
+}
+@keyframes progress-flow {
+  to { background-position: -200% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .progress > i { animation: none; }
 }
 .msg {
   border-radius: var(--radius);
@@ -610,11 +636,21 @@ input[type="radio"] {
 .file-item {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: var(--space-sm);
   border: var(--rule);
   border-radius: var(--radius);
   padding: var(--space-xs) var(--space-sm);
   min-width: 0;
+}
+.result-compare {
+  flex-basis: 100%;
+  padding-top: var(--space-xs);
+}
+.btn.is-active-toggle {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
 }
 .thumb {
   flex: none;
@@ -662,6 +698,12 @@ input[type="radio"] {
 .preview-stage img,
 .preview-stage video {
   max-height: 420px;
+}
+.wm-preview-canvas {
+  max-height: 420px;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-sm);
 }
 
 /* ===== crop selector ===== */

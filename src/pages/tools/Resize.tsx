@@ -47,6 +47,7 @@ export default function Resize() {
         out.push({
           name: replaceExt(file.name, MIME_EXT[mime]),
           blob,
+          original: file,
           note: `${canvas.width} × ${canvas.height}`,
         })
       }

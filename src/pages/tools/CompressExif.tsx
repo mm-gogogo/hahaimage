@@ -26,7 +26,7 @@ export default function CompressExif() {
           maxEdge: Number(maxEdge) > 0 ? Number(maxEdge) : undefined,
         })
         const saved = Math.max(0, Math.round((1 - blob.size / file.size) * 100))
-        out.push({ name: file.name, blob, note: `原 ${formatBytes(file.size)} → 减小 ${saved}% · EXIF 已保留` })
+        out.push({ name: file.name, blob, original: file, note: `原 ${formatBytes(file.size)} → 减小 ${saved}% · EXIF 已保留` })
       }
       setResults(out)
     } catch (e) {

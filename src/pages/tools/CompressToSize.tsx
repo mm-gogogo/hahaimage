@@ -30,7 +30,7 @@ export default function CompressToSize() {
         const parts = [`原 ${formatBytes(file.size)}`, `质量 ${Math.round(quality * 100)}%`]
         if (scale < 1) parts.push(`缩放 ${Math.round(scale * 100)}%`)
         if (!hit) parts.push('已尽力压缩，仍略超目标')
-        out.push({ name: replaceExt(file.name, MIME_EXT[mime]), blob, note: parts.join(' · ') })
+        out.push({ name: replaceExt(file.name, MIME_EXT[mime]), blob, original: file, note: parts.join(' · ') })
       }
       setResults(out)
     } catch (e) {
