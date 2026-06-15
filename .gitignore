@@ -5,3 +5,6 @@ dist
 npm-debug.log*
 test-results
 playwright-report
+
+# Claude 运行时文件
+.claude/
