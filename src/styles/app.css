@@ -687,8 +687,24 @@ input[type="radio"] {
 @keyframes progress-flow {
   to { background-position: -200% 0; }
 }
+/* 不确定进度：加载阶段（无进度事件）时来回滑动，表明仍在工作 */
+.progress.is-indeterminate {
+  background: var(--paper-3);
+}
+.progress.is-indeterminate > i {
+  width: 40% !important;
+  animation: progress-indeterminate 1.1s var(--ease-in-out) infinite;
+}
+@keyframes progress-indeterminate {
+  0% { transform: translateX(-110%); }
+  100% { transform: translateX(275%); }
+}
 @media (prefers-reduced-motion: reduce) {
   .progress > i { animation: none; }
+  .progress.is-indeterminate > i {
+    width: 100% !important;
+    animation: none;
+  }
 }
 .msg {
   border-radius: var(--radius);

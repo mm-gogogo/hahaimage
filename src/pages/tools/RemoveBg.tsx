@@ -65,7 +65,7 @@ export default function RemoveBg() {
         {busy && (
           <div className="field" role="status">
             <span className="help">{status}</span>
-            <div className="progress"><i style={{ width: `${Math.round(progress * 100)}%` }} /></div>
+            <div className={`progress${progress <= 0 ? ' is-indeterminate' : ''}`}><i style={{ width: `${Math.round(progress * 100)}%` }} /></div>
           </div>
         )}
         {error && <p className="msg msg-error">{error}</p>}
