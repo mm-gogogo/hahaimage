@@ -129,6 +129,14 @@ test.describe('站点框架', () => {
     expect(Math.min(...heights)).toBeGreaterThanOrEqual(40)
   })
 
+  test('未知路由显示 404 兜底页并可返回', async ({ page }) => {
+    await page.goto('/#/this-tool-does-not-exist')
+    await expect(page.locator('.notfound-code')).toHaveText('404')
+    await expect(page.getByRole('heading', { name: '没有找到这个页面' })).toBeVisible()
+    await page.getByRole('link', { name: /返回全部工具/ }).click()
+    await expect(page.locator('.tool-card')).toHaveCount(19)
+  })
+
   test('移动端 375px 无横向滚动', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 720 })
     await page.goto('/#/')

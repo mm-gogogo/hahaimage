@@ -894,6 +894,36 @@ a:hover > .thumb {
   outline-offset: 2px;
 }
 
+/* ===== 404 ===== */
+.notfound {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-sm);
+  text-align: center;
+  padding-block: var(--space-3xl);
+  max-width: 460px;
+  margin-inline: auto;
+}
+.notfound-code {
+  font-size: clamp(4rem, 3rem + 8vw, 7rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  background: linear-gradient(100deg, var(--cat-image), var(--cat-gif) 50%, var(--cat-video));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.notfound h1 {
+  font-size: var(--text-xl);
+}
+.notfound p {
+  color: var(--muted);
+}
+.notfound .btn {
+  margin-top: var(--space-sm);
+}
+
 /* ===== misc ===== */
 .suspense-fallback {
   display: grid;

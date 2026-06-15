@@ -7,6 +7,7 @@ import Home from './pages/Home'
 import { allTools } from './tools'
 
 const Admin = lazy(() => import('./pages/Admin'))
+const NotFound = lazy(() => import('./pages/NotFound'))
 
 const REPO_URL = 'https://github.com/mm-gogogo/hahaimage'
 
@@ -46,6 +47,7 @@ function RoutedContent() {
           {allTools.map(tool => (
             <Route key={tool.path} path={tool.path} element={<tool.component />} />
           ))}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
     </Suspense>
