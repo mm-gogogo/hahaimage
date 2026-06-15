@@ -18,6 +18,9 @@ body {
   font-size: var(--text-base);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern", "liga", "tnum";
 }
 h1,
 h2,
@@ -143,7 +146,6 @@ textarea {
   transform: translateY(1px);
 }
 .btn:disabled {
-  opacity: 0.45;
   cursor: not-allowed;
   transform: none;
 }
@@ -151,10 +153,22 @@ textarea {
   background: var(--accent);
   border-color: var(--accent);
   color: var(--on-accent);
+  box-shadow: 0 1px 2px color-mix(in oklch, var(--accent) 30%, transparent);
 }
 .btn-primary:hover {
   background: var(--accent-strong);
   border-color: var(--accent-strong);
+  box-shadow: 0 3px 10px -2px color-mix(in oklch, var(--accent) 45%, transparent);
+}
+/* 禁用态：干净的中性灰，避免半透明橙发浑 */
+.btn-primary:disabled {
+  background: var(--paper-3);
+  border-color: var(--border);
+  color: var(--muted);
+  box-shadow: none;
+}
+.btn:not(.btn-primary):disabled {
+  opacity: 0.5;
 }
 .btn-sm {
   min-height: 36px;
@@ -434,11 +448,15 @@ textarea {
   display: grid;
   gap: var(--space-md);
   min-width: 0;
+  /* 微妙的层次阴影，让面板从纸面浮起一点点 */
+  box-shadow: 0 1px 2px color-mix(in oklch, var(--ink) 5%, transparent);
 }
+/* 面板小标题：等宽数字 + 细微字距，更工整 */
 .panel > h2 {
   font-size: var(--text-sm);
   font-weight: 600;
   color: var(--muted);
+  letter-spacing: 0.01em;
 }
 
 /* ===== dropzone ===== */
@@ -504,14 +522,20 @@ textarea.input {
   border-radius: var(--radius);
   background: var(--paper);
   width: 100%;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
 }
 textarea.input {
   resize: vertical;
 }
+.input:hover {
+  border-color: var(--muted);
+}
 .input:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 0;
-  border-color: transparent;
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--accent) 20%, transparent);
 }
 input[type="range"] {
   accent-color: var(--accent);
