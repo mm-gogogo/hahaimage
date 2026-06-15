@@ -137,6 +137,20 @@ test.describe('站点框架', () => {
     await expect(page.locator('.tool-card')).toHaveCount(19)
   })
 
+  test('社交分享 meta + PWA manifest 就位', async ({ page }) => {
+    await page.goto('/')
+    await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', /哈哈图片/)
+    await expect(page.locator('meta[name="theme-color"]').first()).toHaveAttribute('content', /#/)
+    const manifestHref = await page.locator('link[rel="manifest"]').getAttribute('href')
+    expect(manifestHref).toBeTruthy()
+    const manifest = await page.evaluate(async href => {
+      const r = await fetch(href!)
+      return r.ok ? await r.json() : null
+    }, manifestHref)
+    expect(manifest?.short_name).toBe('哈哈图片')
+    expect(manifest?.icons?.length).toBeGreaterThanOrEqual(1)
+  })
+
   test('移动端 375px 无横向滚动', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 720 })
     await page.goto('/#/')
