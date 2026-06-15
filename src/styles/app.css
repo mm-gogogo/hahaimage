@@ -87,7 +87,7 @@ textarea {
 .site-header.is-scrolled {
   border-bottom-color: var(--border);
   background: color-mix(in oklch, var(--paper) 92%, transparent);
-  box-shadow: 0 4px 16px -8px color-mix(in oklch, var(--ink) 22%, transparent);
+  box-shadow: 0 4px 16px -8px color-mix(in oklch, var(--shadow-color) 28%, transparent);
 }
 .site-header .container {
   display: flex;
@@ -458,7 +458,7 @@ textarea {
   gap: var(--space-md);
   min-width: 0;
   /* 微妙的层次阴影，让面板从纸面浮起一点点 */
-  box-shadow: 0 1px 2px color-mix(in oklch, var(--ink) 5%, transparent);
+  box-shadow: 0 1px 2px color-mix(in oklch, var(--shadow-color) 8%, transparent);
 }
 /* 面板小标题：等宽数字 + 细微字距，更工整 */
 .panel > h2 {
@@ -776,7 +776,7 @@ input[type="radio"] {
 /* 缩略图是可点开原图的链接，hover 时轻微放大提示可交互 */
 a:hover > .thumb {
   transform: scale(1.06);
-  box-shadow: 0 4px 12px -4px color-mix(in oklch, var(--ink) 30%, transparent);
+  box-shadow: 0 4px 12px -4px color-mix(in oklch, var(--shadow-color) 35%, transparent);
 }
 .result-meta {
   min-width: 0;
@@ -839,7 +839,7 @@ a:hover > .thumb {
 .crop-rect {
   position: absolute;
   border: 1.5px solid var(--accent);
-  box-shadow: 0 0 0 9999px color-mix(in oklch, var(--ink) 45%, transparent);
+  box-shadow: 0 0 0 9999px color-mix(in oklch, var(--shadow-color) 55%, transparent);
   cursor: move;
 }
 /* 三分构图辅助线：两横两竖，hover/拖动选区时更清晰 */
@@ -879,7 +879,7 @@ a:hover > .thumb {
   background: var(--paper);
   border: 2px solid var(--accent);
   border-radius: 50%;
-  box-shadow: 0 1px 3px color-mix(in oklch, var(--ink) 40%, transparent);
+  box-shadow: 0 1px 3px color-mix(in oklch, var(--shadow-color) 45%, transparent);
 }
 .crop-handle[data-h="nw"] { top: -7px; left: -7px; cursor: nwse-resize; }
 .crop-handle[data-h="ne"] { top: -7px; right: -7px; cursor: nesw-resize; }
