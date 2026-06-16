@@ -49,6 +49,20 @@ test.describe('易用性', () => {
     await expect(page.locator('.result-item')).toHaveCount(1, { timeout: 300000 })
   })
 
+  test('批量结果显示总体积变化汇总', async ({ page }) => {
+    await page.goto('/#/compress')
+    const png = await makePng(page, 400, 300)
+    await upload(page, [
+      { name: 'a.png', mimeType: 'image/png', buffer: png },
+      { name: 'b.png', mimeType: 'image/png', buffer: png },
+    ])
+    await page.getByRole('button', { name: /开始压缩/ }).click()
+    await expect(page.locator('.result-item')).toHaveCount(2)
+    await expect(page.locator('.result-summary')).toBeVisible()
+    await expect(page.locator('.result-summary')).toContainText('共')
+    await expect(page.locator('.result-summary')).toContainText('→')
+  })
+
   test('诚实体积文案：变大显示增大而非"减小 0%"', async ({ page }) => {
     await page.goto('/#/compress')
     // 极小图压成 JPG 通常会变大

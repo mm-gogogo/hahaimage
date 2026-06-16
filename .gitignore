@@ -8,3 +8,8 @@ playwright-report
 
 # Claude 运行时文件
 .claude/
+.agents/
+
+# 构建时从 node_modules 复制的本地化静态资源（不入库，避免大文件污染 git）
+public/ffmpeg/
+public/imgly/

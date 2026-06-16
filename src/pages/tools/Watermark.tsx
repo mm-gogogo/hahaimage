@@ -4,7 +4,7 @@ import { FileDrop } from '../../components/FileDrop'
 import { FileList } from '../../components/FileList'
 import { ResultList } from '../../components/ResultList'
 import { ToolPage } from '../../components/ToolPage'
-import { MIME_EXT, canvasToBlob, loadImage, replaceExt } from '../../lib/image'
+import { MIME_EXT, canvasToBlob, drawToCanvas, loadImage, replaceExt } from '../../lib/image'
 import { useBatch } from '../../lib/useBatch'
 import { usePersistedState } from '../../lib/usePersistedState'
 import { POSITIONS, type Position, type WmType, renderWatermark } from '../../lib/watermark'
@@ -21,14 +21,25 @@ export default function Watermark() {
   const { results, busy, done, total, error, run, cancel, setError } = useBatch()
 
   const previewRef = useRef<HTMLCanvasElement>(null)
-  const [previewSrc, setPreviewSrc] = useState<HTMLImageElement | null>(null)
+  // 预览基底：把第一张图降采样到最长边 720px 的小画布，预览只在小图上重绘，省算力
+  const [previewBase, setPreviewBase] = useState<{ canvas: HTMLCanvasElement; w: number; h: number } | null>(null)
   const [wmImgEl, setWmImgEl] = useState<HTMLImageElement | null>(null)
 
-  // 第一张图作为实时预览源
   useEffect(() => {
     let cancelled = false
-    if (files[0]) loadImage(files[0]).then(img => !cancelled && setPreviewSrc(img))
-    else setPreviewSrc(null)
+    if (files[0]) {
+      loadImage(files[0]).then(img => {
+        if (cancelled) return
+        const maxEdge = 720
+        const scale = Math.min(1, maxEdge / Math.max(img.naturalWidth, img.naturalHeight))
+        const w = Math.max(1, Math.round(img.naturalWidth * scale))
+        const h = Math.max(1, Math.round(img.naturalHeight * scale))
+        const canvas = drawToCanvas(img, w, h)
+        setPreviewBase({ canvas, w, h })
+      })
+    } else {
+      setPreviewBase(null)
+    }
     return () => {
       cancelled = true
     }
@@ -44,19 +55,23 @@ export default function Watermark() {
     }
   }, [wmImage])
 
-  // 实时把水印画到预览 canvas（参数变化即重绘，缩放到合适显示尺寸）
+  // 实时重绘预览，用 rAF 节流：快速拖动滑块时多次变更合并为每帧一次绘制
   useEffect(() => {
     const canvas = previewRef.current
-    if (!canvas || !previewSrc) return
-    const full = renderWatermark(previewSrc, { type: wmType, text, color, position, opacity, sizePct, image: wmImgEl })
-    const maxW = 640
-    const scale = Math.min(1, maxW / full.width)
-    canvas.width = Math.round(full.width * scale)
-    canvas.height = Math.round(full.height * scale)
-    const ctx = canvas.getContext('2d')!
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-    ctx.drawImage(full, 0, 0, canvas.width, canvas.height)
-  }, [previewSrc, wmType, text, color, position, opacity, sizePct, wmImgEl])
+    if (!canvas || !previewBase) return
+    let raf = 0
+    raf = requestAnimationFrame(() => {
+      const out = renderWatermark(
+        previewBase.canvas,
+        { type: wmType, text, color, position, opacity, sizePct, image: wmImgEl },
+        { w: previewBase.w, h: previewBase.h },
+      )
+      canvas.width = out.width
+      canvas.height = out.height
+      canvas.getContext('2d')!.drawImage(out, 0, 0)
+    })
+    return () => cancelAnimationFrame(raf)
+  }, [previewBase, wmType, text, color, position, opacity, sizePct, wmImgEl])
 
   const start = async () => {
     if (wmType === 'image' && !wmImage) {
@@ -141,7 +156,7 @@ export default function Watermark() {
         />
       </div>
 
-      {previewSrc && (
+      {previewBase && (
         <div className="panel">
           <h2>实时预览{files.length > 1 ? '（第一张）' : ''}</h2>
           <div className="preview-stage">

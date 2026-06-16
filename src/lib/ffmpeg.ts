@@ -1,14 +1,11 @@
 /**
- * ffmpeg.wasm 单例封装。核心 wasm（约 31MB）从 CDN 懒加载，
- * 仅在用户进入 GIF/视频工具并执行操作时才下载，且全站只加载一次。
+ * ffmpeg.wasm 单例封装。核心（约 31MB）随站点构建打包、从本站同源懒加载，
+ * 不依赖任何外部 CDN；仅在用户执行 GIF/视频操作时才加载，且全站只加载一次。
  */
 import type { FFmpeg } from '@ffmpeg/ffmpeg'
 
-const CORE_VERSION = '0.12.10'
-const CDN_BASES = [
-  `https://cdn.jsdelivr.net/npm/@ffmpeg/core@${CORE_VERSION}/dist/esm`,
-  `https://unpkg.com/@ffmpeg/core@${CORE_VERSION}/dist/esm`,
-]
+// 核心从本站同源加载（构建/开发前由 scripts/copy-local-assets.mjs 复制到 public/ffmpeg/）
+const FFMPEG_BASE = `${import.meta.env.BASE_URL}ffmpeg`
 
 let instance: FFmpeg | null = null
 let loading: Promise<FFmpeg> | null = null
@@ -23,21 +20,18 @@ export function getFFmpeg(onStatus?: (msg: string) => void): Promise<FFmpeg> {
       import('@ffmpeg/util'),
     ])
     const ff = new FFmpeg()
-    let lastErr: unknown = null
-    for (const base of CDN_BASES) {
-      try {
-        await ff.load({
-          coreURL: await toBlobURL(`${base}/ffmpeg-core.js`, 'text/javascript'),
-          wasmURL: await toBlobURL(`${base}/ffmpeg-core.wasm`, 'application/wasm'),
-        })
-        instance = ff
-        return ff
-      } catch (e) {
-        lastErr = e
-      }
+    try {
+      // toBlobURL：worker 内以 blob 方式载入核心，跨同源/路径都稳妥
+      await ff.load({
+        coreURL: await toBlobURL(`${FFMPEG_BASE}/ffmpeg-core.js`, 'text/javascript'),
+        wasmURL: await toBlobURL(`${FFMPEG_BASE}/ffmpeg-core.wasm`, 'application/wasm'),
+      })
+      instance = ff
+      return ff
+    } catch (e) {
+      loading = null
+      throw new Error(`ffmpeg 组件加载失败，请重试：${String(e)}`)
     }
-    loading = null
-    throw new Error(`ffmpeg 组件加载失败，请检查网络后重试：${String(lastErr)}`)
   })()
   return loading
 }

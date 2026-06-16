@@ -1,0 +1,19 @@
+{
+  "name": "哈哈图片 - 在线图片工具箱",
+  "short_name": "哈哈图片",
+  "description": "免费开源的在线图片工具箱，图片/GIF/视频处理全部在浏览器本地完成，文件不上传。",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fbfaf7",
+  "theme_color": "#fbfaf7",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any"
+    }
+  ]
+}

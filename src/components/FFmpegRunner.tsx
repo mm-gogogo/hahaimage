@@ -28,7 +28,7 @@ export function FFmpegRunner({
       {busy && (
         <div className="field" role="status">
           <span className="help">{status || '处理中…'}</span>
-          <div className="progress">
+          <div className={`progress${progress <= 0 ? ' is-indeterminate' : ''}`}>
             <i style={{ width: `${Math.round(progress * 100)}%` }} />
           </div>
         </div>

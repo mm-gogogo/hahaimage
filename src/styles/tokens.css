@@ -37,6 +37,9 @@
   --cat-ai: oklch(56% 0.12 168);
   --cat-ai-tint: oklch(95% 0.035 168);
 
+  /* 阴影/遮罩专用深色（不随 --ink 在暗色翻转，保证阴影始终是暗的） */
+  --shadow-color: oklch(20% 0.02 60);
+
   /* type */
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB",
@@ -107,4 +110,7 @@
   --cat-video-tint: oklch(30% 0.05 245);
   --cat-ai: oklch(72% 0.12 168);
   --cat-ai-tint: oklch(30% 0.05 168);
+
+  /* 暗色下阴影用纯黑、更强，才压得住深色背景 */
+  --shadow-color: oklch(0% 0 0);
 }

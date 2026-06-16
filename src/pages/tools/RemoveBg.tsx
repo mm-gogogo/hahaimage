@@ -23,13 +23,19 @@ export default function RemoveBg() {
     cancelled.current = false
     try {
       setStatus('正在加载 AI 模型（首次约 40MB，仅需一次）…')
-      const { removeBackground } = await import('@imgly/background-removal')
+      const [{ removeBackground }, { getConfig }] = await Promise.all([
+        import('@imgly/background-removal'),
+        import('../../lib/config'),
+      ])
+      // 部署者可在 site.config.json 设 ai.modelBaseUrl 指向自托管模型，留空则用官方 CDN
+      const modelBaseUrl = getConfig().ai?.modelBaseUrl
       const out: ResultItem[] = []
       for (let i = 0; i < files.length; i++) {
         if (cancelled.current) break
         const file = files[i]
         setStatus(`正在处理第 ${i + 1} / ${files.length} 张：${file.name}`)
         const blob = await removeBackground(file, {
+          ...(modelBaseUrl ? { publicPath: new URL(modelBaseUrl, location.href).href } : {}),
           progress: (_key, current, total) => {
             const fileRatio = total > 0 ? current / total : 0
             setProgress((i + fileRatio) / files.length)
@@ -65,7 +71,7 @@ export default function RemoveBg() {
         {busy && (
           <div className="field" role="status">
             <span className="help">{status}</span>
-            <div className="progress"><i style={{ width: `${Math.round(progress * 100)}%` }} /></div>
+            <div className={`progress${progress <= 0 ? ' is-indeterminate' : ''}`}><i style={{ width: `${Math.round(progress * 100)}%` }} /></div>
           </div>
         )}
         {error && <p className="msg msg-error">{error}</p>}

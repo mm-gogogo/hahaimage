@@ -213,7 +213,7 @@
   border-radius: 50%;
   background: var(--accent);
   color: var(--on-accent);
-  box-shadow: 0 2px 8px -2px color-mix(in oklch, var(--ink) 40%, transparent);
+  box-shadow: 0 2px 8px -2px color-mix(in oklch, var(--shadow-color) 45%, transparent);
 }
 .ba-handle::after {
   content: '⟺';

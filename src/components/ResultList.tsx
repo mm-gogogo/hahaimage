@@ -27,8 +27,15 @@ function ResultRow({ item, index }: { item: ResultItem; index: number }) {
     },
     [url, originalUrl],
   )
+  const [downloaded, setDownloaded] = useState(false)
   const isVideo = item.blob.type.startsWith('video/')
   const canCompare = !!originalUrl && !isVideo
+
+  const handleDownload = () => {
+    downloadBlob(item.blob, item.name)
+    setDownloaded(true)
+    window.setTimeout(() => setDownloaded(false), 1800)
+  }
 
   return (
     <div className="result-item" style={{ '--ri': index } as React.CSSProperties}>
@@ -56,9 +63,9 @@ function ResultRow({ item, index }: { item: ResultItem; index: number }) {
           对比
         </button>
       )}
-      <button className="btn btn-sm" onClick={() => downloadBlob(item.blob, item.name)}>
-        <Icon name="download" size={16} />
-        下载
+      <button className={`btn btn-sm${downloaded ? ' is-success' : ''}`} onClick={handleDownload}>
+        <Icon name={downloaded ? 'check' : 'download'} size={16} />
+        {downloaded ? '已下载' : '下载'}
       </button>
       {canCompare && compare && (
         <div className="result-compare">
@@ -71,9 +78,26 @@ function ResultRow({ item, index }: { item: ResultItem; index: number }) {
 
 export function ResultList({ items, zipName = 'hahaimage.zip' }: { items: ResultItem[]; zipName?: string }) {
   if (items.length === 0) return null
+
+  // 批量汇总：所有结果都带原图时，统计总体积变化
+  const withOriginal = items.filter(it => it.original)
+  const summary =
+    items.length > 1 && withOriginal.length === items.length
+      ? (() => {
+          const origTotal = withOriginal.reduce((s, it) => s + it.original!.size, 0)
+          const newTotal = items.reduce((s, it) => s + it.blob.size, 0)
+          const pct = Math.round((1 - newTotal / origTotal) * 100)
+          const dir = pct >= 1 ? `减小 ${pct}%` : pct <= -1 ? `增大 ${Math.abs(pct)}%` : '体积基本不变'
+          return `共 ${formatBytes(origTotal)} → ${formatBytes(newTotal)}（${dir}）`
+        })()
+      : null
+
   return (
     <div className="panel" aria-live="polite">
-      <h2>处理结果（{items.length} 个文件）</h2>
+      <h2>
+        处理结果（{items.length} 个文件）
+        {summary && <span className="result-summary">{summary}</span>}
+      </h2>
       <div className="result-list">
         {items.map((it, i) => (
           <ResultRow key={`${it.name}-${i}`} item={it} index={i} />

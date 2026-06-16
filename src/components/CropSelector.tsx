@@ -108,6 +108,12 @@ export function CropSelector({ src, naturalWidth, naturalHeight, value, onChange
         }}
         onPointerDown={onPointerDown('move')}
       >
+        {/* 三分构图辅助线 */}
+        <span className="crop-thirds" aria-hidden="true" />
+        {/* 实时尺寸徽标 */}
+        <span className="crop-dim" aria-hidden="true">
+          {value.w} × {value.h}
+        </span>
         {(['nw', 'ne', 'sw', 'se'] as const).map(h => (
           <span key={h} className="crop-handle" data-h={h} onPointerDown={onPointerDown(h)} />
         ))}

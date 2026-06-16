@@ -39,9 +39,17 @@ function anchor(pos: Position, w: number, h: number, margin: number) {
 }
 
 /** 把水印画到一张图上，返回带水印的 canvas */
-export function renderWatermark(source: HTMLImageElement, opts: WatermarkOptions): HTMLCanvasElement {
-  const w = source.naturalWidth
-  const h = source.naturalHeight
+/**
+ * 把水印画到图上。dims 显式给定输出尺寸时按该尺寸渲染（预览用降采样源以提速），
+ * 不传则用图片的自然尺寸。水印大小/边距/字号均相对宽度，缩放后视觉等价。
+ */
+export function renderWatermark(
+  source: CanvasImageSource & { naturalWidth?: number; naturalHeight?: number },
+  opts: WatermarkOptions,
+  dims?: { w: number; h: number },
+): HTMLCanvasElement {
+  const w = dims?.w ?? source.naturalWidth ?? 0
+  const h = dims?.h ?? source.naturalHeight ?? 0
   const canvas = drawToCanvas(source, w, h)
   const ctx = canvas.getContext('2d')!
   ctx.globalAlpha = opts.opacity
