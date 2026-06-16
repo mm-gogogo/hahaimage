@@ -8,6 +8,10 @@ import { allTools } from './tools'
 
 const Admin = lazy(() => import('./pages/Admin'))
 const NotFound = lazy(() => import('./pages/NotFound'))
+const About = lazy(() => import('./pages/About'))
+const Faq = lazy(() => import('./pages/Faq'))
+const Privacy = lazy(() => import('./pages/Privacy'))
+const Community = lazy(() => import('./pages/Community'))
 
 const REPO_URL = 'https://github.com/mm-gogogo/hahaimage'
 
@@ -43,6 +47,10 @@ function RoutedContent() {
       <div className="route-fade" key={pathname}>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/faq" element={<Faq />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/community" element={<Community />} />
           <Route path="/admin" element={<Admin />} />
           {allTools.map(tool => (
             <Route key={tool.path} path={tool.path} element={<tool.component />} />
@@ -114,29 +122,68 @@ export default function App() {
         <RoutedContent />
       </main>
 
-      <footer className="site-footer">
-        <div className="container">
-          <p>
-            哈哈图片是一个开源项目，所有图片处理均在浏览器本地完成，不收集、不上传你的任何文件。
-          </p>
-          <div className="links">
-            <a href={REPO_URL} target="_blank" rel="noreferrer">
-              GitHub 源码
-            </a>
-            <a href={`${REPO_URL}/issues`} target="_blank" rel="noreferrer">
-              反馈问题
-            </a>
-            <Link to="/admin">站点配置</Link>
-          </div>
-          <FooterExtra />
-        </div>
-      </footer>
+      <SiteFooter />
     </>
   )
 }
 
-function FooterExtra() {
+function SiteFooter() {
   const config = useSyncExternalStore(subscribeConfig, getConfig)
-  const text = config.site?.footerText
-  return text ? <p>{text}</p> : null
+  const community = config.community
+  const communityLinks = community?.links ?? []
+  const footerText = config.site?.footerText
+
+  return (
+    <footer className="site-footer">
+      <div className="container footer-grid">
+        <div className="footer-brand">
+          <Link to="/" className="brand">
+            <span className="brand-mark">
+              <Icon name="image" size={18} />
+            </span>
+            哈哈图片
+          </Link>
+          <p>免费开源的在线图片工具箱，所有处理都在你的浏览器本地完成，文件不会上传。</p>
+        </div>
+
+        <nav className="footer-col" aria-label="说明">
+          <h3>了解</h3>
+          <Link to="/about">关于</Link>
+          <Link to="/faq">常见问题</Link>
+          <Link to="/privacy">隐私说明</Link>
+        </nav>
+
+        <nav className="footer-col" aria-label="社群">
+          <h3>社群</h3>
+          {communityLinks.length > 0 ? (
+            communityLinks.map((l, i) => (
+              <a key={i} href={l.url} target="_blank" rel="noreferrer">
+                {l.label}
+              </a>
+            ))
+          ) : (
+            <Link to="/community">加入社群</Link>
+          )}
+          <a href={`${REPO_URL}/issues`} target="_blank" rel="noreferrer">
+            反馈问题
+          </a>
+        </nav>
+
+        <nav className="footer-col" aria-label="项目">
+          <h3>项目</h3>
+          <a href={REPO_URL} target="_blank" rel="noreferrer">
+            GitHub 源码
+          </a>
+          <a href={`${REPO_URL}/discussions`} target="_blank" rel="noreferrer">
+            讨论区
+          </a>
+          <Link to="/admin">站点配置</Link>
+        </nav>
+      </div>
+      <div className="container footer-bottom">
+        <span>开源免费 · MIT 协议</span>
+        {footerText && <span>{footerText}</span>}
+      </div>
+    </footer>
+  )
 }

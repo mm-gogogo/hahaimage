@@ -19,5 +19,16 @@
       "home-bottom": { "html": "" },
       "tool-bottom": { "html": "" }
     }
+  },
+  "ai": {
+    "modelBaseUrl": ""
+  },
+  "community": {
+    "title": "加入社群",
+    "description": "欢迎加入交流：反馈问题、提出想做的新工具，或和其他用户交流技巧。",
+    "links": [
+      { "label": "微信交流群", "url": "https://example.com/wechat" },
+      { "label": "Telegram", "url": "https://t.me/example" }
+    ]
   }
 }

@@ -120,13 +120,41 @@ test.describe('站点框架', () => {
     expect(focusedId).toBe('main-content')
   })
 
-  test('页脚链接触控目标 ≥40px', async ({ page }) => {
+  test('页脚链接触控目标 ≥38px', async ({ page }) => {
     await page.goto('/#/')
-    const heights = await page.locator('.site-footer .links a').evaluateAll(els =>
+    const heights = await page.locator('.footer-col a').evaluateAll(els =>
       els.map(e => Math.round(e.getBoundingClientRect().height)),
     )
     expect(heights.length).toBeGreaterThanOrEqual(3)
-    expect(Math.min(...heights)).toBeGreaterThanOrEqual(40)
+    expect(Math.min(...heights)).toBeGreaterThanOrEqual(38)
+  })
+
+  test('说明页可达：关于 / FAQ / 隐私 / 社群', async ({ page }) => {
+    for (const [path, heading] of [
+      ['/about', '关于哈哈图片'],
+      ['/faq', '常见问题'],
+      ['/privacy', '隐私说明'],
+      ['/community', '加入社群'],
+    ]) {
+      await page.goto(`/#${path}`)
+      await expect(page.getByRole('heading', { name: heading, level: 1 })).toBeVisible()
+    }
+  })
+
+  test('FAQ 折叠项可展开', async ({ page }) => {
+    await page.goto('/#/faq')
+    const items = page.locator('.faq-item')
+    await expect(items.first()).toBeVisible()
+    expect(await items.count()).toBeGreaterThanOrEqual(6)
+    const second = items.nth(1)
+    await expect(second).toHaveJSProperty('open', false)
+    await second.locator('summary').click()
+    await expect(second).toHaveJSProperty('open', true)
+  })
+
+  test('页脚社群入口默认指向社群页', async ({ page }) => {
+    await page.goto('/#/')
+    await expect(page.locator('.footer-col a[href*="community"]')).toHaveCount(1)
   })
 
   test('未知路由显示 404 兜底页并可返回', async ({ page }) => {

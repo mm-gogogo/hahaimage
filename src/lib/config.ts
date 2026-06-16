@@ -30,6 +30,16 @@ export interface SiteConfig {
     /** 槽位 id -> 广告代码；内置槽位：home-top / home-bottom / tool-bottom */
     slots?: Record<string, AdSlotConfig>
   }
+  ai?: {
+    /** AI 抠图模型资源基址；设为本地（如 "./imgly/dist/"）即完全本地托管，留空用官方 CDN */
+    modelBaseUrl?: string
+  }
+  /** 加入社群入口：在页脚与「社群」页展示 */
+  community?: {
+    title?: string
+    description?: string
+    links?: { label: string; url: string }[]
+  }
 }
 
 export const LOCAL_OVERRIDE_KEY = 'hahaimage.config.override'

@@ -5,9 +5,13 @@
   "type": "module",
   "description": "哈哈图片 - 免费开源的在线图片/GIF/视频工具箱，所有处理均在浏览器本地完成",
   "scripts": {
+    "copy-assets": "node scripts/copy-local-assets.mjs",
+    "predev": "node scripts/copy-local-assets.mjs",
     "dev": "vite",
+    "prebuild": "node scripts/copy-local-assets.mjs",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
+    "fetch-ai-model": "node scripts/fetch-ai-model.mjs",
     "test": "playwright test",
     "test:ai": "RUN_AI=1 playwright test tests/ai.spec.ts"
   },
@@ -22,6 +26,8 @@
     "react-router-dom": "^7.17.0"
   },
   "devDependencies": {
+    "@ffmpeg/core": "^0.12.10",
+    "@imgly/background-removal-data": "^1.4.5",
     "@playwright/test": "^1.59.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
